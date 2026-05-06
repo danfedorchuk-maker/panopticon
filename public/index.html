@@ -5,79 +5,119 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PANOPTICON — Market Intelligence</title>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Syne+Mono&family=Syne:wght@400;600;800&display=swap');
-
 :root {
-  --bg:#0d1117;--surface:#161b22;--border:#30363d;
-  --accent:#cc88ff;--accent2:#ff9933;--accent3:#00ccff;
-  --text:#e0eaf5;--muted:#7090b0;--danger:#ff4444;--success:#00dd88;
+  --bg: #f5f6f8; --surface: #ffffff; --surface2: #eef0f3;
+  --border: #d8dce3; --border-light: #e8ebf0;
+  --accent: #2563eb; --accent2: #d97706; --accent3: #0891b2;
+  --text: #1a1f2e; --text-secondary: #4b5563; --muted: #9ca3af;
+  --danger: #dc2626; --success: #059669;
+  --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
 }
-*{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;overflow-x:hidden}
-body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(200,100,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(200,100,255,0.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
-.wrap{position:relative;z-index:1;max-width:1400px;margin:0 auto;padding:0 24px 60px}
-header{padding:32px 0 28px;border-bottom:1px solid var(--border);margin-bottom:36px;display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:16px}
-.logo{font-family:'Syne',sans-serif;font-weight:800;font-size:2.4rem;letter-spacing:-0.02em;color:#fff;line-height:1}
-.logo span{color:var(--accent)}
-.tagline{font-family:'Syne Mono',monospace;font-size:0.68rem;color:var(--muted);letter-spacing:0.2em;margin-top:6px}
-.header-meta{font-family:'Syne Mono',monospace;font-size:0.65rem;color:var(--muted);text-align:right;line-height:1.8}
-.live-dot{display:inline-block;width:7px;height:7px;background:var(--success);border-radius:50%;margin-right:5px;animation:blink 2s infinite}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:0.2}}
-.search-label{font-family:'Syne Mono',monospace;font-size:0.65rem;letter-spacing:0.2em;color:var(--muted);text-transform:uppercase;margin-bottom:10px}
-.search-row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:36px}
-.search-input{flex:1;min-width:200px;background:var(--surface);border:1px solid var(--border);border-radius:4px;color:#fff;font-family:'Syne Mono',monospace;font-size:1.1rem;padding:14px 18px;outline:none;letter-spacing:0.05em;transition:border-color 0.2s}
-.search-input:focus{border-color:var(--accent)}
-.search-input::placeholder{color:var(--muted);font-size:0.85rem}
-.btn{background:transparent;border:1px solid var(--accent);color:var(--accent);font-family:'Syne Mono',monospace;font-size:0.78rem;letter-spacing:0.1em;padding:14px 24px;border-radius:4px;cursor:pointer;transition:background 0.18s,color 0.18s;white-space:nowrap}
-.btn:hover{background:var(--accent);color:#000}
-.btn-orange{border-color:var(--accent2);color:var(--accent2)}
-.btn-orange:hover{background:var(--accent2);color:#000}
-.stream-tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:28px;overflow-x:auto}
-.tab{font-family:'Syne Mono',monospace;font-size:0.7rem;letter-spacing:0.12em;padding:10px 20px;border:none;background:transparent;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:color 0.2s,border-color 0.2s;white-space:nowrap}
-.tab:hover{color:var(--text)}
-.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
-.panel-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px}
-@media(max-width:900px){.panel-grid{grid-template-columns:1fr}}
-.panel,.panel-full{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:20px}
-.panel{min-height:300px}
-.panel-full{margin-bottom:20px}
-.panel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border)}
-.panel-title{font-family:'Syne Mono',monospace;font-size:0.65rem;letter-spacing:0.2em;color:var(--muted);text-transform:uppercase}
-.panel-badge{font-family:'Syne Mono',monospace;font-size:0.6rem;padding:3px 8px;border-radius:3px;letter-spacing:0.1em}
-.badge-purple{background:rgba(200,100,255,0.15);color:var(--accent);border:1px solid rgba(200,100,255,0.3)}
-.badge-orange{background:rgba(255,136,0,0.15);color:var(--accent2);border:1px solid rgba(255,136,0,0.3)}
-.badge-blue{background:rgba(0,204,255,0.15);color:var(--accent3);border:1px solid rgba(0,204,255,0.3)}
-.badge-green{background:rgba(0,204,136,0.15);color:var(--success);border:1px solid rgba(0,204,136,0.3)}
-.trade-item{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
-.trade-item:last-child{border-bottom:none}
-.trade-ticker{font-family:'Syne Mono',monospace;font-size:0.85rem;font-weight:700;color:#fff;min-width:60px}
-.trade-meta{flex:1}
-.trade-name{font-size:0.8rem;color:var(--text);margin-bottom:2px}
-.trade-detail{font-family:'Syne Mono',monospace;font-size:0.65rem;color:var(--muted)}
-.trade-amount{font-family:'Syne Mono',monospace;font-size:0.75rem;text-align:right}
-.amount-buy{color:var(--success)}
-.amount-sell{color:var(--danger)}
-.contract-item{padding:10px 0;border-bottom:1px solid var(--border)}
-.contract-item:last-child{border-bottom:none}
-.contract-name{font-size:0.82rem;color:#fff;margin-bottom:3px;font-weight:600}
-.contract-detail{font-family:'Syne Mono',monospace;font-size:0.63rem;color:var(--muted);line-height:1.7}
-.contract-amount{font-family:'Syne Mono',monospace;font-size:0.75rem;color:var(--accent2);margin-top:3px}
-.fund-item{padding:10px 0;border-bottom:1px solid var(--border)}
-.fund-item:last-child{border-bottom:none}
-.fund-name{font-size:0.82rem;color:#fff;font-weight:600;margin-bottom:4px}
-.fund-holdings{display:flex;flex-wrap:wrap;gap:6px;margin-top:5px}
-.holding-tag{font-family:'Syne Mono',monospace;font-size:0.6rem;padding:2px 7px;border-radius:3px;background:rgba(0,204,255,0.1);color:var(--accent3);border:1px solid rgba(0,204,255,0.2)}
-.analysis-output{font-size:0.88rem;color:var(--text);line-height:1.7}
-.analysis-output h1,.analysis-output h2,.analysis-output h3{color:var(--accent);font-size:0.8rem;letter-spacing:0.1em;text-transform:uppercase;margin:16px 0 8px;font-family:'Syne Mono',monospace}
-.analysis-output p{margin-bottom:10px}
-.analysis-output strong{color:#fff}
-.empty-state{font-family:'Syne Mono',monospace;font-size:0.72rem;color:var(--muted);text-align:center;padding:40px 20px;line-height:1.8}
-.loading{font-family:'Syne Mono',monospace;font-size:0.72rem;color:var(--accent);text-align:center;padding:40px 20px}
-footer{border-top:1px solid var(--border);padding-top:20px;margin-top:40px;font-family:'Syne Mono',monospace;font-size:0.62rem;color:var(--muted);text-align:center;line-height:1.8}
-::-webkit-scrollbar{width:4px;height:4px}
-::-webkit-scrollbar-track{background:var(--bg)}
-::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: 'IBM Plex Sans','Noto Sans TC',sans-serif; min-height: 100vh; overflow-x: hidden; }
+body::before { content:''; position:fixed; inset:0; background-image: linear-gradient(var(--border-light) 1px,transparent 1px), linear-gradient(90deg,var(--border-light) 1px,transparent 1px); background-size:32px 32px; pointer-events:none; z-index:0; opacity:0.6; }
+.wrap { position:relative; z-index:1; max-width:1400px; margin:0 auto; padding:0 24px 60px; }
+
+header { padding:28px 0 24px; border-bottom:2px solid var(--border); margin-bottom:32px; display:flex; align-items:flex-end; justify-content:space-between; flex-wrap:wrap; gap:16px; }
+.logo { font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:2rem; letter-spacing:-0.03em; color:var(--text); line-height:1; }
+.logo span { color:var(--accent); }
+.tagline { font-family:'IBM Plex Mono',monospace; font-size:0.62rem; color:var(--muted); letter-spacing:0.18em; margin-top:7px; }
+.header-right { display:flex; flex-direction:column; align-items:flex-end; gap:10px; }
+.header-meta { font-family:'IBM Plex Mono',monospace; font-size:0.62rem; color:var(--text-secondary); text-align:right; line-height:2; background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:10px 14px; box-shadow:var(--shadow); }
+.live-dot { display:inline-block; width:7px; height:7px; background:var(--success); border-radius:50%; margin-right:5px; animation:blink 2s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.25} }
+
+.lang-toggle { display:flex; border:1.5px solid var(--border); border-radius:6px; overflow:hidden; box-shadow:var(--shadow); background:var(--surface); }
+.lang-btn { padding:7px 16px; border:none; background:transparent; color:var(--muted); font-family:'IBM Plex Mono',monospace; font-size:0.75rem; font-weight:600; cursor:pointer; transition:background 0.18s,color 0.18s; }
+.lang-btn.active { background:var(--accent); color:#fff; }
+.lang-btn:not(.active):hover { background:var(--surface2); color:var(--text); }
+
+.search-label { font-family:'IBM Plex Mono',monospace; font-size:0.62rem; letter-spacing:0.18em; color:var(--muted); text-transform:uppercase; margin-bottom:10px; }
+.search-row { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:28px; }
+.search-input { flex:1; min-width:220px; background:var(--surface); border:1.5px solid var(--border); border-radius:6px; color:var(--text); font-family:'IBM Plex Mono',monospace; font-size:1rem; padding:13px 18px; outline:none; letter-spacing:0.04em; transition:border-color 0.18s,box-shadow 0.18s; box-shadow:var(--shadow); }
+.search-input:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(37,99,235,0.1); }
+.search-input::placeholder { color:var(--muted); font-size:0.82rem; }
+.btn { background:var(--accent); border:none; color:#fff; font-family:'IBM Plex Sans',sans-serif; font-size:0.82rem; font-weight:600; padding:13px 22px; border-radius:6px; cursor:pointer; transition:background 0.18s,transform 0.1s; white-space:nowrap; box-shadow:var(--shadow); }
+.btn:hover { background:#1d4ed8; transform:translateY(-1px); }
+.btn:active { transform:translateY(0); }
+.btn-orange { background:var(--accent2); }
+.btn-orange:hover { background:#b45309; }
+
+.stream-tabs { display:flex; border-bottom:2px solid var(--border); margin-bottom:24px; overflow-x:auto; gap:2px; }
+.tab { font-family:'IBM Plex Sans',sans-serif; font-size:0.72rem; font-weight:500; padding:10px 18px; border:none; background:transparent; color:var(--muted); cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-2px; transition:color 0.18s,border-color 0.18s,background 0.18s; white-space:nowrap; border-radius:4px 4px 0 0; }
+.tab:hover { color:var(--text); background:var(--surface2); }
+.tab.active { color:var(--accent); border-bottom-color:var(--accent); background:var(--surface); font-weight:700; }
+
+.panel-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
+@media(max-width:900px) { .panel-grid { grid-template-columns:1fr; } }
+.panel,.panel-full { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:20px; box-shadow:var(--shadow); }
+.panel { min-height:300px; }
+.panel-full { margin-bottom:16px; }
+.panel-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid var(--border-light); }
+.panel-title { font-family:'IBM Plex Sans',sans-serif; font-size:0.72rem; letter-spacing:0.06em; color:var(--text-secondary); font-weight:700; }
+.panel-badge { font-family:'IBM Plex Mono',monospace; font-size:0.58rem; padding:3px 8px; border-radius:4px; letter-spacing:0.08em; font-weight:600; }
+.badge-purple { background:#ede9fe; color:#7c3aed; border:1px solid #c4b5fd; }
+.badge-orange { background:#fef3c7; color:#d97706; border:1px solid #fcd34d; }
+.badge-blue   { background:#e0f2fe; color:#0284c7; border:1px solid #7dd3fc; }
+.badge-green  { background:#d1fae5; color:#059669; border:1px solid #6ee7b7; }
+
+.trade-item { display:flex; align-items:flex-start; gap:12px; padding:10px 0; border-bottom:1px solid var(--border-light); }
+.trade-item:last-child { border-bottom:none; }
+.trade-ticker { font-family:'IBM Plex Mono',monospace; font-size:0.82rem; font-weight:700; color:var(--accent); min-width:60px; background:#eff6ff; padding:3px 7px; border-radius:4px; text-align:center; }
+.trade-meta { flex:1; }
+.trade-name { font-size:0.8rem; color:var(--text); margin-bottom:2px; font-weight:500; }
+.trade-detail { font-family:'IBM Plex Mono',monospace; font-size:0.62rem; color:var(--muted); }
+.trade-amount { font-family:'IBM Plex Mono',monospace; font-size:0.72rem; text-align:right; font-weight:600; }
+.amount-buy { color:var(--success); }
+.amount-sell { color:var(--danger); }
+
+.contract-item { padding:10px 0; border-bottom:1px solid var(--border-light); }
+.contract-item:last-child { border-bottom:none; }
+.contract-name { font-size:0.84rem; color:var(--text); margin-bottom:3px; font-weight:600; }
+.contract-detail { font-family:'IBM Plex Mono',monospace; font-size:0.61rem; color:var(--text-secondary); line-height:1.7; }
+.contract-amount { font-family:'IBM Plex Mono',monospace; font-size:0.78rem; color:var(--accent2); margin-top:4px; font-weight:700; }
+
+.fund-item { padding:10px 0; border-bottom:1px solid var(--border-light); }
+.fund-item:last-child { border-bottom:none; }
+.fund-name { font-size:0.84rem; color:var(--text); font-weight:600; margin-bottom:4px; }
+.fund-holdings { display:flex; flex-wrap:wrap; gap:5px; margin-top:5px; }
+.holding-tag { font-family:'IBM Plex Mono',monospace; font-size:0.58rem; padding:2px 7px; border-radius:3px; background:#e0f2fe; color:#0284c7; border:1px solid #bae6fd; font-weight:600; }
+
+.analysis-output { font-size:0.9rem; color:var(--text); line-height:1.8; }
+.analysis-output h1,.analysis-output h2,.analysis-output h3 { color:var(--accent); font-size:0.78rem; letter-spacing:0.06em; margin:18px 0 8px; font-weight:700; padding-bottom:5px; border-bottom:1px solid var(--border-light); }
+.analysis-output p { margin-bottom:10px; color:var(--text-secondary); }
+.analysis-output strong { color:var(--text); }
+
+.empty-state { font-family:'IBM Plex Sans',sans-serif; font-size:0.78rem; color:var(--muted); text-align:center; padding:40px 20px; line-height:2; }
+.loading { font-family:'IBM Plex Mono',monospace; font-size:0.7rem; color:var(--accent); text-align:center; padding:40px 20px; animation:pulse 1.5s ease-in-out infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+footer { border-top:1px solid var(--border); padding-top:20px; margin-top:40px; font-family:'IBM Plex Sans',sans-serif; font-size:0.62rem; color:var(--muted); text-align:center; line-height:2; }
+
+::-webkit-scrollbar { width:5px; height:5px; }
+::-webkit-scrollbar-track { background:var(--bg); }
+::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
+
+@media(max-width:640px) {
+  .wrap { padding:0 14px 40px; }
+  header { padding:20px 0 18px; margin-bottom:20px; flex-direction:column; align-items:flex-start; gap:12px; }
+  .header-right { align-items:flex-start; width:100%; }
+  .header-meta { width:100%; text-align:left; font-size:0.58rem; padding:8px 12px; }
+  .logo { font-size:1.5rem; }
+  .tagline { font-size:0.55rem; }
+  .search-row { flex-direction:column; gap:8px; }
+  .search-input { font-size:0.92rem; padding:12px 14px; min-width:unset; width:100%; }
+  .btn { width:100%; text-align:center; padding:13px 16px; }
+  .tab { font-size:0.65rem; padding:9px 10px; }
+  .panel-grid { grid-template-columns:1fr; gap:12px; margin-bottom:12px; }
+  .panel { min-height:unset; padding:16px; }
+  .panel-full { padding:16px; }
+  .empty-state { font-size:0.7rem; padding:28px 12px; }
+  .loading { font-size:0.65rem; padding:28px 12px; }
+  footer { font-size:0.55rem; }
+}
 </style>
 </head>
 <body>
@@ -86,109 +126,225 @@ footer{border-top:1px solid var(--border);padding-top:20px;margin-top:40px;font-
   <header>
     <div>
       <div class="logo">PAN<span>OPTICON</span></div>
-      <div class="tagline">INTELLIGENCE SURVEILLANCE TERMINAL — FOLLOWING THE MONEY</div>
+      <div class="tagline" id="tagline"></div>
     </div>
-    <div class="header-meta">
-      <span class="live-dot"></span>LIVE DATA STREAMS ACTIVE<br>
-      CONGRESSIONAL · HEDGE FUNDS · US CONTRACTS · CA CONTRACTS<br>
-      <span id="lastUpdate">—</span>
+    <div class="header-right">
+      <div class="lang-toggle">
+        <button class="lang-btn" id="btnEN" onclick="setLang('en')">EN</button>
+        <button class="lang-btn active" id="btnZH" onclick="setLang('zh')">繁中</button>
+      </div>
+      <div class="header-meta">
+        <span class="live-dot"></span><span id="liveLabel"></span><br>
+        <span id="streamsLabel"></span><br>
+        <span id="lastUpdate">—</span>
+      </div>
     </div>
   </header>
 
-  <div class="search-label">SEARCH COMPANY OR TICKER</div>
+  <div class="search-label" id="searchLabel"></div>
   <div class="search-row">
-    <input type="text" class="search-input" id="searchInput" placeholder="e.g. PLTR, Raytheon, Lockheed, Palantir, Microsoft...">
-    <button class="btn" onclick="runSearch()">SCAN ALL STREAMS</button>
-    <button class="btn btn-orange" onclick="loadRecent()">RECENT ACTIVITY</button>
+    <input type="text" class="search-input" id="searchInput">
+    <button class="btn" id="btnScan" onclick="runSearch()"></button>
+    <button class="btn btn-orange" id="btnRecent" onclick="loadRecent()"></button>
   </div>
 
   <div class="stream-tabs">
-    <button class="tab active" onclick="switchTab(this,'all')">ALL STREAMS</button>
-    <button class="tab" onclick="switchTab(this,'congress')">CONGRESSIONAL TRADES</button>
-    <button class="tab" onclick="switchTab(this,'hedge')">HEDGE FUNDS 13F</button>
-    <button class="tab" onclick="switchTab(this,'sam')">US CONTRACTS</button>
-    <button class="tab" onclick="switchTab(this,'canada')">CANADA CONTRACTS</button>
-    <button class="tab" onclick="switchTab(this,'analysis')">AI CROSS-REFERENCE</button>
+    <button class="tab active" onclick="switchTab(this,'all')" id="tab-all"></button>
+    <button class="tab" onclick="switchTab(this,'congress')" id="tab-congress"></button>
+    <button class="tab" onclick="switchTab(this,'hedge')" id="tab-hedge"></button>
+    <button class="tab" onclick="switchTab(this,'sam')" id="tab-sam"></button>
+    <button class="tab" onclick="switchTab(this,'canada')" id="tab-canada"></button>
+    <button class="tab" onclick="switchTab(this,'analysis')" id="tab-analysis"></button>
   </div>
 
   <div class="panel-grid" id="mainGrid">
-
     <div class="panel" id="panelCongress">
       <div class="panel-header">
-        <div class="panel-title">CONGRESSIONAL TRADES</div>
-        <span class="panel-badge badge-purple">STOCK ACT DISCLOSURES</span>
+        <div class="panel-title" id="title-congress"></div>
+        <span class="panel-badge badge-purple" id="badge-congress"></span>
       </div>
-      <div id="congressData" class="empty-state">Enter a ticker or click RECENT ACTIVITY to see the latest congressional trades.</div>
+      <div id="congressData" class="empty-state"></div>
     </div>
-
     <div class="panel" id="panelHedge">
       <div class="panel-header">
-        <div class="panel-title">HEDGE FUND 13F FILINGS</div>
+        <div class="panel-title" id="title-hedge"></div>
         <span class="panel-badge badge-blue">SEC EDGAR</span>
       </div>
-      <div id="hedgeData" class="empty-state">Search a ticker to see which major funds hold this position.</div>
+      <div id="hedgeData" class="empty-state"></div>
     </div>
-
     <div class="panel" id="panelSAM">
       <div class="panel-header">
-        <div class="panel-title">US GOVERNMENT CONTRACTS</div>
+        <div class="panel-title" id="title-sam"></div>
         <span class="panel-badge badge-orange">SAM.GOV</span>
       </div>
-      <div id="samData" class="empty-state">Search a company name to find federal contract awards.</div>
+      <div id="samData" class="empty-state"></div>
     </div>
-
     <div class="panel" id="panelCanada">
       <div class="panel-header">
-        <div class="panel-title">CANADA FEDERAL CONTRACTS</div>
+        <div class="panel-title" id="title-canada"></div>
         <span class="panel-badge badge-green">BUYANDSELL.GC.CA</span>
       </div>
-      <div id="canadaData" class="empty-state">Search a company name to find Canadian federal contract awards.</div>
+      <div id="canadaData" class="empty-state"></div>
     </div>
-
   </div>
 
   <div class="panel-full" id="panelAnalysis">
     <div class="panel-header">
-      <div class="panel-title">AI CROSS-REFERENCE ANALYSIS</div>
+      <div class="panel-title" id="title-analysis"></div>
       <span class="panel-badge badge-purple">GROQ — LLAMA 3.3 70B</span>
     </div>
-    <div id="analysisData" class="empty-state">
-      Run a search to generate a cross-reference intelligence report.<br>
-      Panopticon identifies connections between congressional trades, hedge fund positions, and government contracts.
-    </div>
+    <div id="analysisData" class="empty-state"></div>
   </div>
 
-  <footer>
-    PANOPTICON — FOR RESEARCH AND EDUCATIONAL PURPOSES ONLY. NOT FINANCIAL ADVICE.<br>
-    DATA: HOUSE STOCK WATCHER · SEC EDGAR · SAM.GOV · BUYANDSELL.GC.CA<br>
-    ALL DATA IS PUBLICLY AVAILABLE GOVERNMENT DISCLOSURE INFORMATION.
-  </footer>
+  <footer id="footerText"></footer>
 
 </div>
 <script>
+// ── STRINGS ───────────────────────────────────────────────────────
+const T = {
+  en: {
+    tagline:          'INTELLIGENCE SURVEILLANCE TERMINAL — FOLLOWING THE MONEY',
+    live:             'LIVE DATA STREAMS ACTIVE',
+    streams:          'CONGRESSIONAL · HEDGE FUNDS · US CONTRACTS · CA CONTRACTS',
+    searchLabel:      'SEARCH COMPANY OR TICKER',
+    placeholder:      'e.g. PLTR, Raytheon, Lockheed, Palantir, Microsoft...',
+    btnScan:          'SCAN ALL STREAMS',
+    btnRecent:        'RECENT ACTIVITY',
+    tabAll:           'ALL STREAMS',
+    tabCongress:      'CONGRESSIONAL TRADES',
+    tabHedge:         'HEDGE FUNDS 13F',
+    tabSam:           'US CONTRACTS',
+    tabCanada:        'CANADA CONTRACTS',
+    tabAnalysis:      'AI CROSS-REFERENCE',
+    titleCongress:    'CONGRESSIONAL TRADES',
+    badgeCongress:    'STOCK ACT DISCLOSURES',
+    titleHedge:       'HEDGE FUND 13F FILINGS',
+    titleSam:         'US GOVERNMENT CONTRACTS',
+    titleCanada:      'CANADA FEDERAL CONTRACTS',
+    titleAnalysis:    'AI CROSS-REFERENCE ANALYSIS',
+    emptyCongress:    'Enter a ticker or click RECENT ACTIVITY to see the latest congressional trades.',
+    emptyHedge:       'Search a ticker to see which major funds hold this position.',
+    emptySam:         'Search a company name to find federal contract awards.',
+    emptyCanada:      'Search a company name to find Canadian federal contract awards.',
+    emptyAnalysis:    'Run a search to generate a cross-reference intelligence report.<br>Panopticon identifies connections between congressional trades, hedge fund positions, and government contracts.',
+    loading:          'scanning...',
+    loadingAnalysis:  'generating cross-reference intelligence...',
+    noDataCongress:   q => `No congressional disclosures found for "${q}".`,
+    noDataHedge:      q => `No major fund holdings found for "${q}".<br>Try the exact ticker symbol.`,
+    noDataSam:        q => `No US government contracts found for "${q}".`,
+    noDataCanada:     q => `No Canadian federal contracts found for "${q}".`,
+    recentOther:      'Enter a ticker above to search this stream.',
+    recentAnalysis:   'Run a specific search to generate cross-reference analysis.',
+    updated:          'Updated: ',
+    analysisFail:     'Analysis failed. Try again.',
+    analysisError:    'Analysis error.',
+    footer:           'PANOPTICON — FOR RESEARCH AND EDUCATIONAL PURPOSES ONLY. NOT FINANCIAL ADVICE.<br>DATA: HOUSE STOCK WATCHER · SEC EDGAR · SAM.GOV · BUYANDSELL.GC.CA<br>ALL DATA IS PUBLICLY AVAILABLE GOVERNMENT DISCLOSURE INFORMATION.',
+    systemPrompt:     'You are a financial intelligence analyst. Analyze the following public data and write a detailed cross-reference intelligence report IN ENGLISH. Identify connections between congressional trades, hedge fund 13F positions, and government contracts. Point out timing patterns, notable signals, and concentration of activity. Be factual and data-driven. Use clear markdown headers for each section.',
+  },
+  zh: {
+    tagline:          '情報監控終端 — 追蹤資金流向',
+    live:             '即時數據流啟動中',
+    streams:          '國會交易 · 對沖基金 · 美國合同 · 加拿大合同',
+    searchLabel:      '搜索公司或股票代碼',
+    placeholder:      '例如：PLTR、雷神、洛克希德、帕蘭提爾、微軟...',
+    btnScan:          '掃描所有數據流',
+    btnRecent:        '最新動態',
+    tabAll:           '所有數據流',
+    tabCongress:      '國會交易',
+    tabHedge:         '對沖基金 13F',
+    tabSam:           '美國政府合同',
+    tabCanada:        '加拿大合同',
+    tabAnalysis:      'AI 交叉分析',
+    titleCongress:    '國會交易記錄',
+    badgeCongress:    '股票法披露',
+    titleHedge:       '對沖基金 13F 申報',
+    titleSam:         '美國政府合同',
+    titleCanada:      '加拿大聯邦合同',
+    titleAnalysis:    'AI 交叉參考分析',
+    emptyCongress:    '輸入股票代碼或點擊「最新動態」，查看最新國會交易記錄。',
+    emptyHedge:       '搜索股票代碼，查看主要基金的持倉情況。',
+    emptySam:         '搜索公司名稱，查找美國聯邦合同授予情況。',
+    emptyCanada:      '搜索公司名稱，查找加拿大聯邦合同授予情況。',
+    emptyAnalysis:    '執行搜索以生成交叉參考情報報告。<br>全景監控系統識別國會交易、對沖基金持倉與政府合同之間的關聯。',
+    loading:          '掃描中...',
+    loadingAnalysis:  '正在生成交叉參考情報分析...',
+    noDataCongress:   q => `未找到「${q}」的國會披露記錄。`,
+    noDataHedge:      q => `未找到「${q}」的主要基金持倉記錄。<br>請嘗試使用精確的股票代碼。`,
+    noDataSam:        q => `未找到「${q}」的美國政府合同記錄。`,
+    noDataCanada:     q => `未找到「${q}」的加拿大聯邦合同記錄。`,
+    recentOther:      '請在上方輸入股票代碼以搜索此數據流。',
+    recentAnalysis:   '請執行特定搜索以生成交叉參考分析。',
+    updated:          '更新時間：',
+    analysisFail:     '分析失敗，請重試。',
+    analysisError:    '分析出錯，請重試。',
+    footer:           '全景監控系統 — 僅供研究及教育用途，不構成投資建議。<br>數據來源：衆議院股票觀察站 · SEC EDGAR · SAM.GOV · BUYANDSELL.GC.CA<br>所有數據均來自公開政府披露信息。',
+    systemPrompt:     '你是一位金融情報分析師。請以繁體中文分析以下公開數據，撰寫一份詳細的交叉參考情報報告。識別國會交易、對沖基金13F持倉與政府合同之間的關聯，指出時間規律、值得注意的信號及活動集中點。請以事實為依據，使用Markdown標題格式分節撰寫，語言風格專業清晰。',
+  }
+};
+
+let lang = 'zh';
+
+function setLang(l) {
+  lang = l;
+  const t = T[l];
+  document.getElementById('btnEN').classList.toggle('active', l==='en');
+  document.getElementById('btnZH').classList.toggle('active', l==='zh');
+  document.getElementById('tagline').textContent        = t.tagline;
+  document.getElementById('liveLabel').textContent      = t.live;
+  document.getElementById('streamsLabel').textContent   = t.streams;
+  document.getElementById('searchLabel').textContent    = t.searchLabel;
+  document.getElementById('searchInput').placeholder    = t.placeholder;
+  document.getElementById('btnScan').textContent        = t.btnScan;
+  document.getElementById('btnRecent').textContent      = t.btnRecent;
+  document.getElementById('tab-all').textContent        = t.tabAll;
+  document.getElementById('tab-congress').textContent   = t.tabCongress;
+  document.getElementById('tab-hedge').textContent      = t.tabHedge;
+  document.getElementById('tab-sam').textContent        = t.tabSam;
+  document.getElementById('tab-canada').textContent     = t.tabCanada;
+  document.getElementById('tab-analysis').textContent   = t.tabAnalysis;
+  document.getElementById('title-congress').textContent = t.titleCongress;
+  document.getElementById('badge-congress').textContent = t.badgeCongress;
+  document.getElementById('title-hedge').textContent    = t.titleHedge;
+  document.getElementById('title-sam').textContent      = t.titleSam;
+  document.getElementById('title-canada').textContent   = t.titleCanada;
+  document.getElementById('title-analysis').textContent = t.titleAnalysis;
+  document.getElementById('footerText').innerHTML       = t.footer;
+  document.getElementById('congressData').innerHTML     = `<div class="empty-state">${t.emptyCongress}</div>`;
+  document.getElementById('hedgeData').innerHTML        = `<div class="empty-state">${t.emptyHedge}</div>`;
+  document.getElementById('samData').innerHTML          = `<div class="empty-state">${t.emptySam}</div>`;
+  document.getElementById('canadaData').innerHTML       = `<div class="empty-state">${t.emptyCanada}</div>`;
+  document.getElementById('analysisData').innerHTML     = `<div class="empty-state">${t.emptyAnalysis}</div>`;
+}
+
+// Init
+setLang('zh');
+
+// ── TABS ──────────────────────────────────────────────────────────
 function switchTab(el, tab) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   el.classList.add('active');
-  const panels = ['panelCongress','panelHedge','panelSAM','panelCanada'];
+  const all = ['panelCongress','panelHedge','panelSAM','panelCanada'];
   const grid = document.getElementById('mainGrid');
   const analysis = document.getElementById('panelAnalysis');
   const map = {congress:'panelCongress',hedge:'panelHedge',sam:'panelSAM',canada:'panelCanada'};
-  if (tab === 'all') {
-    grid.style.display = 'grid'; analysis.style.display = 'block';
-    panels.forEach(p => document.getElementById(p).style.display = 'block');
-  } else if (tab === 'analysis') {
-    grid.style.display = 'none'; analysis.style.display = 'block';
+  if (tab==='all') {
+    grid.style.display='grid'; analysis.style.display='block';
+    all.forEach(p=>document.getElementById(p).style.display='block');
+  } else if (tab==='analysis') {
+    grid.style.display='none'; analysis.style.display='block';
   } else {
-    grid.style.display = 'grid'; analysis.style.display = 'none';
-    panels.forEach(p => { document.getElementById(p).style.display = map[tab]===p ? 'block':'none'; });
+    grid.style.display='grid'; analysis.style.display='none';
+    all.forEach(p=>{document.getElementById(p).style.display=map[tab]===p?'block':'none';});
   }
 }
 
+// ── SEARCH ────────────────────────────────────────────────────────
 async function runSearch() {
   const q = document.getElementById('searchInput').value.trim();
   if (!q) return;
   setLoading();
-  document.getElementById('lastUpdate').textContent = 'Updated: ' + new Date().toLocaleTimeString();
+  const t = T[lang];
+  document.getElementById('lastUpdate').textContent = t.updated + new Date().toLocaleTimeString();
   const [c,h,s,ca] = await Promise.allSettled([
     fetchAPI('/api/congress?q='+encodeURIComponent(q)).then(d=>d.trades||[]),
     fetchAPI('/api/hedge?q='+encodeURIComponent(q)).then(d=>d.holdings||[]),
@@ -211,46 +367,46 @@ async function runSearch() {
 
 async function loadRecent() {
   setLoading();
-  document.getElementById('lastUpdate').textContent = 'Updated: ' + new Date().toLocaleTimeString();
+  const t = T[lang];
+  document.getElementById('lastUpdate').textContent = t.updated + new Date().toLocaleTimeString();
   const data = await fetchAPI('/api/congress?q=').then(d=>d.trades||[]).catch(()=>[]);
   renderCongress(data, '');
-  ['hedgeData','samData','canadaData'].forEach(id => {
-    document.getElementById(id).innerHTML = '<div class="empty-state">Enter a ticker above to search this stream.</div>';
+  ['hedgeData','samData','canadaData'].forEach(id=>{
+    document.getElementById(id).innerHTML=`<div class="empty-state">${t.recentOther}</div>`;
   });
-  document.getElementById('analysisData').innerHTML = '<div class="empty-state">Run a specific search to generate cross-reference analysis.</div>';
+  document.getElementById('analysisData').innerHTML=`<div class="empty-state">${t.recentAnalysis}</div>`;
 }
 
 function setLoading() {
-  ['congressData','hedgeData','samData','canadaData','analysisData'].forEach(id => {
-    document.getElementById(id).innerHTML = '<div class="loading">scanning...</div>';
+  const t = T[lang];
+  ['congressData','hedgeData','samData','canadaData','analysisData'].forEach(id=>{
+    document.getElementById(id).innerHTML=`<div class="loading">${t.loading}</div>`;
   });
 }
 
-async function fetchAPI(url) {
-  const res = await fetch(url);
-  return res.json();
-}
+async function fetchAPI(url) { const r=await fetch(url); return r.json(); }
 
+// ── RENDERERS ─────────────────────────────────────────────────────
 function renderCongress(trades, q) {
-  const el = document.getElementById('congressData');
-  if (!trades.length) { el.innerHTML = `<div class="empty-state">No congressional disclosures found for "${q}".</div>`; return; }
-  el.innerHTML = trades.slice(0,15).map(t => `
+  const el=document.getElementById('congressData'), t=T[lang];
+  if (!trades.length){el.innerHTML=`<div class="empty-state">${t.noDataCongress(q)}</div>`;return;}
+  el.innerHTML=trades.slice(0,15).map(x=>`
     <div class="trade-item">
-      <div class="trade-ticker">${esc(t.ticker||'—')}</div>
+      <div class="trade-ticker">${esc(x.ticker||'—')}</div>
       <div class="trade-meta">
-        <div class="trade-name">${esc(t.asset_description||t.ticker||'')}</div>
-        <div class="trade-detail">${esc(t.representative||t.senator||'Unknown')} · ${esc(t.transaction_date||'')}</div>
+        <div class="trade-name">${esc(x.asset_description||x.ticker||'')}</div>
+        <div class="trade-detail">${esc(x.representative||x.senator||'Unknown')} · ${esc(x.transaction_date||'')}</div>
       </div>
-      <div class="trade-amount ${(t.type||'').toLowerCase().includes('sale')?'amount-sell':'amount-buy'}">
-        ${esc(t.type||'Trade')}<br><span style="font-size:0.6rem;color:var(--muted)">${esc(t.amount||'')}</span>
+      <div class="trade-amount ${(x.type||'').toLowerCase().includes('sale')?'amount-sell':'amount-buy'}">
+        ${esc(x.type||'Trade')}<br><span style="font-size:0.6rem;color:var(--muted)">${esc(x.amount||'')}</span>
       </div>
     </div>`).join('');
 }
 
 function renderHedge(holdings, q) {
-  const el = document.getElementById('hedgeData');
-  if (!holdings.length) { el.innerHTML = `<div class="empty-state">No major fund holdings found for "${q}".<br>Try the exact ticker symbol.</div>`; return; }
-  el.innerHTML = holdings.slice(0,10).map(h => `
+  const el=document.getElementById('hedgeData'), t=T[lang];
+  if (!holdings.length){el.innerHTML=`<div class="empty-state">${t.noDataHedge(q)}</div>`;return;}
+  el.innerHTML=holdings.slice(0,10).map(h=>`
     <div class="fund-item">
       <div class="fund-name">${esc(h.fund_name||h.name||'')}</div>
       <div class="trade-detail">${esc(h.filing_date||'')} · ${esc((h.shares||0).toLocaleString())} shares · $${esc((h.value||0).toLocaleString())}K</div>
@@ -259,9 +415,9 @@ function renderHedge(holdings, q) {
 }
 
 function renderSAM(contracts, q) {
-  const el = document.getElementById('samData');
-  if (!contracts.length) { el.innerHTML = `<div class="empty-state">No US government contracts found for "${q}".</div>`; return; }
-  el.innerHTML = contracts.slice(0,10).map(c => `
+  const el=document.getElementById('samData'), t=T[lang];
+  if (!contracts.length){el.innerHTML=`<div class="empty-state">${t.noDataSam(q)}</div>`;return;}
+  el.innerHTML=contracts.slice(0,10).map(c=>`
     <div class="contract-item">
       <div class="contract-name">${esc(c.vendorName||c.awardee||'Unknown')}</div>
       <div class="contract-detail">${esc(c.agencyName||'')} · ${esc(c.award_date||c.date||'')}<br>${esc(c.description||c.title||'')}</div>
@@ -270,9 +426,9 @@ function renderSAM(contracts, q) {
 }
 
 function renderCanada(contracts, q) {
-  const el = document.getElementById('canadaData');
-  if (!contracts.length) { el.innerHTML = `<div class="empty-state">No Canadian federal contracts found for "${q}".</div>`; return; }
-  el.innerHTML = contracts.slice(0,10).map(c => `
+  const el=document.getElementById('canadaData'), t=T[lang];
+  if (!contracts.length){el.innerHTML=`<div class="empty-state">${t.noDataCanada(q)}</div>`;return;}
+  el.innerHTML=contracts.slice(0,10).map(c=>`
     <div class="contract-item">
       <div class="contract-name">${esc(c.vendor_name||c.supplier_name||'Unknown')}</div>
       <div class="contract-detail">${esc(c.department||c.owner_org||'')} · ${esc(c.contract_date||c.award_date||'')}<br>${esc(c.description_en||c.description||'')}</div>
@@ -281,34 +437,35 @@ function renderCanada(contracts, q) {
 }
 
 async function generateAnalysis(results) {
-  const el = document.getElementById('analysisData');
-  el.innerHTML = '<div class="loading">generating cross-reference intelligence...</div>';
+  const el=document.getElementById('analysisData'), t=T[lang];
+  el.innerHTML=`<div class="loading">${t.loadingAnalysis}</div>`;
   try {
-    const res = await fetch('/api/analyze-panopticon', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify(results)
+    const res=await fetch('/api/analyze-panopticon',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({...results, lang, systemPrompt: t.systemPrompt})
     });
-    const data = await res.json();
-    el.innerHTML = data.result
-      ? `<div class="analysis-output">${marked.parse(data.result)}</div>`
-      : '<div class="empty-state">Analysis failed. Try again.</div>';
+    const data=await res.json();
+    el.innerHTML=data.result
+      ?`<div class="analysis-output">${marked.parse(data.result)}</div>`
+      :`<div class="empty-state">${t.analysisFail}</div>`;
   } catch(err) {
-    el.innerHTML = '<div class="empty-state">Analysis error.</div>';
+    el.innerHTML=`<div class="empty-state">${t.analysisError}</div>`;
   }
 }
 
-function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-function fmtAmt(v) {
-  if (!v) return '—';
-  const n = parseFloat(String(v).replace(/[^0-9.]/g,''));
-  if (isNaN(n)) return String(v);
-  if (n>=1e9) return '$'+(n/1e9).toFixed(2)+'B';
-  if (n>=1e6) return '$'+(n/1e6).toFixed(2)+'M';
-  if (n>=1e3) return '$'+(n/1e3).toFixed(0)+'K';
-  return '$'+n.toFixed(0);
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function fmtAmt(v){
+  if(!v)return'—';
+  const n=parseFloat(String(v).replace(/[^0-9.]/g,''));
+  if(isNaN(n))return String(v);
+  if(n>=1e9)return'$'+(n/1e9).toFixed(2)+'B';
+  if(n>=1e6)return'$'+(n/1e6).toFixed(2)+'M';
+  if(n>=1e3)return'$'+(n/1e3).toFixed(0)+'K';
+  return'$'+n.toFixed(0);
 }
-document.getElementById('searchInput').addEventListener('keydown', e => { if(e.key==='Enter') runSearch(); });
+
+document.getElementById('searchInput').addEventListener('keydown',e=>{if(e.key==='Enter')runSearch();});
 </script>
 </body>
 </html>
