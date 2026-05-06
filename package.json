@@ -1,7 +1,0 @@
-{
-  "name": "panopticon",
-  "version": "1.0.0",
-  "description": "Panopticon — Intelligence Surveillance Terminal",
-  "private": true,
-  "engines": { "node": ">=18" }
-}
