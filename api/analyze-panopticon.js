@@ -1,5 +1,6 @@
 // api/analyze-panopticon.js — Panopticon
 // Takes all four data streams and generates a cross-reference intelligence report
+// Supports English and Traditional Chinese via systemPrompt sent from frontend
 
 const handler = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).json({ result: 'Method not allowed.' });
@@ -7,16 +8,17 @@ const handler = async (req, res) => {
   const groqKey = process.env.GROQ_API_KEY;
   if (!groqKey) return res.status(200).json({ result: 'SYSTEM ERROR: GROQ_API_KEY missing.' });
 
-  const { query, congress = [], hedge = [], sam = [], canada = [] } = req.body || {};
+  const { query, congress = [], hedge = [], sam = [], canada = [], lang = 'en', systemPrompt } = req.body || {};
 
   if (!query) return res.status(200).json({ result: 'No search query provided.' });
 
-  // Build context from all four streams
-  const today = new Date().toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+  const today = new Date().toLocaleDateString(lang === 'zh' ? 'zh-TW' : 'en-US', {
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+  });
 
+  // Build context from all four streams
   let context = `PANOPTICON INTELLIGENCE REPORT — ${today}\nSearch Query: "${query}"\n\n`;
 
-  // Congressional trades
   if (congress.length > 0) {
     context += `## CONGRESSIONAL TRADES (${congress.length} disclosures)\n`;
     congress.slice(0,10).forEach(t => {
@@ -27,7 +29,6 @@ const handler = async (req, res) => {
     context += `## CONGRESSIONAL TRADES\nNo disclosures found for "${query}".\n\n`;
   }
 
-  // Hedge fund holdings
   if (hedge.length > 0) {
     context += `## HEDGE FUND 13F HOLDINGS (${hedge.length} funds)\n`;
     hedge.slice(0,8).forEach(h => {
@@ -38,7 +39,6 @@ const handler = async (req, res) => {
     context += `## HEDGE FUND HOLDINGS\nNo major fund positions found for "${query}".\n\n`;
   }
 
-  // US government contracts
   if (sam.length > 0) {
     context += `## US GOVERNMENT CONTRACTS (${sam.length} awards)\n`;
     sam.slice(0,8).forEach(c => {
@@ -50,7 +50,6 @@ const handler = async (req, res) => {
     context += `## US GOVERNMENT CONTRACTS\nNo federal contracts found for "${query}".\n\n`;
   }
 
-  // Canadian contracts
   if (canada.length > 0) {
     context += `## CANADIAN FEDERAL CONTRACTS (${canada.length} awards)\n`;
     canada.slice(0,8).forEach(c => {
@@ -62,18 +61,9 @@ const handler = async (req, res) => {
     context += `## CANADIAN FEDERAL CONTRACTS\nNo Canadian federal contracts found for "${query}".\n\n`;
   }
 
-  try {
-    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${groqKey}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile',
-        max_tokens: 1500,
-        temperature: 0.4,
-        messages: [
-          {
-            role: 'system',
-            content: `You are Panopticon, an institutional intelligence analyst specializing in cross-referencing congressional stock trades, hedge fund positions, and government contracts to identify potential patterns, conflicts of interest, and investment signals.
+  // Use the system prompt sent from the frontend (language-aware),
+  // or fall back to the default English prompt if none was provided.
+  const defaultSystemPrompt = `You are Panopticon, an institutional intelligence analyst specializing in cross-referencing congressional stock trades, hedge fund positions, and government contracts to identify potential patterns, conflicts of interest, and investment signals.
 
 Your analysis is factual, precise, and based only on the data provided. You are NOT a financial advisor. You identify patterns and correlations in public disclosure data for research purposes.
 
@@ -96,12 +86,23 @@ The most important finding — are there any correlations between congressional 
 ## RISK FLAGS
 Any patterns that suggest information asymmetry or unusual timing?
 
-Keep it dense and analytical. Today is ${today}.`
-          },
-          {
-            role: 'user',
-            content: `Analyze the following public disclosure data for "${query}" and generate a cross-reference intelligence report:\n\n${context}`
-          }
+Keep it dense and analytical. Today is ${today}.`;
+
+  const finalSystemPrompt = systemPrompt
+    ? `${systemPrompt}\n\nToday is ${today}.`
+    : defaultSystemPrompt;
+
+  try {
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${groqKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        max_tokens: 1500,
+        temperature: 0.4,
+        messages: [
+          { role: 'system', content: finalSystemPrompt },
+          { role: 'user', content: `Analyze the following public disclosure data for "${query}" and generate a cross-reference intelligence report:\n\n${context}` }
         ]
       })
     });
