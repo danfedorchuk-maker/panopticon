@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PANOPTICON — Market Intelligence</title>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne+Mono&family=Syne:wght@400;600;800&display=swap');
+
+:root {
+  --bg:#05060a;--surface:#080c12;--border:#111a24;
+  --accent:#c8f;--accent2:#f80;--accent3:#0cf;
+  --text:#b0c4d8;--muted:#304050;--danger:#f33;--success:#0c8;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(200,100,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(200,100,255,0.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
+.wrap{position:relative;z-index:1;max-width:1400px;margin:0 auto;padding:0 24px 60px}
+header{padding:32px 0 28px;border-bottom:1px solid var(--border);margin-bottom:36px;display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:16px}
+.logo{font-family:'Syne',sans-serif;font-weight:800;font-size:2.4rem;letter-spacing:-0.02em;color:#fff;line-height:1}
+.logo span{color:var(--accent)}
+.tagline{font-family:'Syne Mono',monospace;font-size:0.68rem;color:var(--muted);letter-spacing:0.2em;margin-top:6px}
+.header-meta{font-family:'Syne Mono',monospace;font-size:0.65rem;color:var(--muted);text-align:right;line-height:1.8}
+.live-dot{display:inline-block;width:7px;height:7px;background:var(--success);border-radius:50%;margin-right:5px;animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.2}}
+.search-label{font-family:'Syne Mono',monospace;font-size:0.65rem;letter-spacing:0.2em;color:var(--muted);text-transform:uppercase;margin-bottom:10px}
+.search-row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:36px}
+.search-input{flex:1;min-width:200px;background:var(--surface);border:1px solid var(--border);border-radius:4px;color:#fff;font-family:'Syne Mono',monospace;font-size:1.1rem;padding:14px 18px;outline:none;letter-spacing:0.05em;transition:border-color 0.2s}
+.search-input:focus{border-color:var(--accent)}
+.search-input::placeholder{color:var(--muted);font-size:0.85rem}
+.btn{background:transparent;border:1px solid var(--accent);color:var(--accent);font-family:'Syne Mono',monospace;font-size:0.78rem;letter-spacing:0.1em;padding:14px 24px;border-radius:4px;cursor:pointer;transition:background 0.18s,color 0.18s;white-space:nowrap}
+.btn:hover{background:var(--accent);color:#000}
+.btn-orange{border-color:var(--accent2);color:var(--accent2)}
+.btn-orange:hover{background:var(--accent2);color:#000}
+.stream-tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:28px;overflow-x:auto}
+.tab{font-family:'Syne Mono',monospace;font-size:0.7rem;letter-spacing:0.12em;padding:10px 20px;border:none;background:transparent;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:color 0.2s,border-color 0.2s;white-space:nowrap}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.panel-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px}
+@media(max-width:900px){.panel-grid{grid-template-columns:1fr}}
+.panel,.panel-full{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:20px}
+.panel{min-height:300px}
+.panel-full{margin-bottom:20px}
+.panel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+.panel-title{font-family:'Syne Mono',monospace;font-size:0.65rem;letter-spacing:0.2em;color:var(--muted);text-transform:uppercase}
+.panel-badge{font-family:'Syne Mono',monospace;font-size:0.6rem;padding:3px 8px;border-radius:3px;letter-spacing:0.1em}
+.badge-purple{background:rgba(200,100,255,0.15);color:var(--accent);border:1px solid rgba(200,100,255,0.3)}
+.badge-orange{background:rgba(255,136,0,0.15);color:var(--accent2);border:1px solid rgba(255,136,0,0.3)}
+.badge-blue{background:rgba(0,204,255,0.15);color:var(--accent3);border:1px solid rgba(0,204,255,0.3)}
+.badge-green{background:rgba(0,204,136,0.15);color:var(--success);border:1px solid rgba(0,204,136,0.3)}
+.trade-item{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
+.trade-item:last-child{border-bottom:none}
+.trade-ticker{font-family:'Syne Mono',monospace;font-size:0.85rem;font-weight:700;color:#fff;min-width:60px}
+.trade-meta{flex:1}
+.trade-name{font-size:0.8rem;color:var(--text);margin-bottom:2px}
+.trade-detail{font-family:'Syne Mono',monospace;font-size:0.65rem;color:var(--muted)}
+.trade-amount{font-family:'Syne Mono',monospace;font-size:0.75rem;text-align:right}
+.amount-buy{color:var(--success)}
+.amount-sell{color:var(--danger)}
+.contract-item{padding:10px 0;border-bottom:1px solid var(--border)}
+.contract-item:last-child{border-bottom:none}
+.contract-name{font-size:0.82rem;color:#fff;margin-bottom:3px;font-weight:600}
+.contract-detail{font-family:'Syne Mono',monospace;font-size:0.63rem;color:var(--muted);line-height:1.7}
+.contract-amount{font-family:'Syne Mono',monospace;font-size:0.75rem;color:var(--accent2);margin-top:3px}
+.fund-item{padding:10px 0;border-bottom:1px solid var(--border)}
+.fund-item:last-child{border-bottom:none}
+.fund-name{font-size:0.82rem;color:#fff;font-weight:600;margin-bottom:4px}
+.fund-holdings{display:flex;flex-wrap:wrap;gap:6px;margin-top:5px}
+.holding-tag{font-family:'Syne Mono',monospace;font-size:0.6rem;padding:2px 7px;border-radius:3px;background:rgba(0,204,255,0.1);color:var(--accent3);border:1px solid rgba(0,204,255,0.2)}
+.analysis-output{font-size:0.88rem;color:var(--text);line-height:1.7}
+.analysis-output h1,.analysis-output h2,.analysis-output h3{color:var(--accent);font-size:0.8rem;letter-spacing:0.1em;text-transform:uppercase;margin:16px 0 8px;font-family:'Syne Mono',monospace}
+.analysis-output p{margin-bottom:10px}
+.analysis-output strong{color:#fff}
+.empty-state{font-family:'Syne Mono',monospace;font-size:0.72rem;color:var(--muted);text-align:center;padding:40px 20px;line-height:1.8}
+.loading{font-family:'Syne Mono',monospace;font-size:0.72rem;color:var(--accent);text-align:center;padding:40px 20px}
+footer{border-top:1px solid var(--border);padding-top:20px;margin-top:40px;font-family:'Syne Mono',monospace;font-size:0.62rem;color:var(--muted);text-align:center;line-height:1.8}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div>
+      <div class="logo">PAN<span>OPTICON</span></div>
+      <div class="tagline">INTELLIGENCE SURVEILLANCE TERMINAL — FOLLOWING THE MONEY</div>
+    </div>
+    <div class="header-meta">
+      <span class="live-dot"></span>LIVE DATA STREAMS ACTIVE<br>
+      CONGRESSIONAL · HEDGE FUNDS · US CONTRACTS · CA CONTRACTS<br>
+      <span id="lastUpdate">—</span>
+    </div>
+  </header>
+
+  <div class="search-label">SEARCH COMPANY OR TICKER</div>
+  <div class="search-row">
+    <input type="text" class="search-input" id="searchInput" placeholder="e.g. PLTR, Raytheon, Lockheed, Palantir, Microsoft...">
+    <button class="btn" onclick="runSearch()">SCAN ALL STREAMS</button>
+    <button class="btn btn-orange" onclick="loadRecent()">RECENT ACTIVITY</button>
+  </div>
+
+  <div class="stream-tabs">
+    <button class="tab active" onclick="switchTab(this,'all')">ALL STREAMS</button>
+    <button class="tab" onclick="switchTab(this,'congress')">CONGRESSIONAL TRADES</button>
+    <button class="tab" onclick="switchTab(this,'hedge')">HEDGE FUNDS 13F</button>
+    <button class="tab" onclick="switchTab(this,'sam')">US CONTRACTS</button>
+    <button class="tab" onclick="switchTab(this,'canada')">CANADA CONTRACTS</button>
+    <button class="tab" onclick="switchTab(this,'analysis')">AI CROSS-REFERENCE</button>
+  </div>
+
+  <div class="panel-grid" id="mainGrid">
+
+    <div class="panel" id="panelCongress">
+      <div class="panel-header">
+        <div class="panel-title">CONGRESSIONAL TRADES</div>
+        <span class="panel-badge badge-purple">STOCK ACT DISCLOSURES</span>
+      </div>
+      <div id="congressData" class="empty-state">Enter a ticker or click RECENT ACTIVITY to see the latest congressional trades.</div>
+    </div>
+
+    <div class="panel" id="panelHedge">
+      <div class="panel-header">
+        <div class="panel-title">HEDGE FUND 13F FILINGS</div>
+        <span class="panel-badge badge-blue">SEC EDGAR</span>
+      </div>
+      <div id="hedgeData" class="empty-state">Search a ticker to see which major funds hold this position.</div>
+    </div>
+
+    <div class="panel" id="panelSAM">
+      <div class="panel-header">
+        <div class="panel-title">US GOVERNMENT CONTRACTS</div>
+        <span class="panel-badge badge-orange">SAM.GOV</span>
+      </div>
+      <div id="samData" class="empty-state">Search a company name to find federal contract awards.</div>
+    </div>
+
+    <div class="panel" id="panelCanada">
+      <div class="panel-header">
+        <div class="panel-title">CANADA FEDERAL CONTRACTS</div>
+        <span class="panel-badge badge-green">BUYANDSELL.GC.CA</span>
+      </div>
+      <div id="canadaData" class="empty-state">Search a company name to find Canadian federal contract awards.</div>
+    </div>
+
+  </div>
+
+  <div class="panel-full" id="panelAnalysis">
+    <div class="panel-header">
+      <div class="panel-title">AI CROSS-REFERENCE ANALYSIS</div>
+      <span class="panel-badge badge-purple">GROQ — LLAMA 3.3 70B</span>
+    </div>
+    <div id="analysisData" class="empty-state">
+      Run a search to generate a cross-reference intelligence report.<br>
+      Panopticon identifies connections between congressional trades, hedge fund positions, and government contracts.
+    </div>
+  </div>
+
+  <footer>
+    PANOPTICON — FOR RESEARCH AND EDUCATIONAL PURPOSES ONLY. NOT FINANCIAL ADVICE.<br>
+    DATA: HOUSE STOCK WATCHER · SEC EDGAR · SAM.GOV · BUYANDSELL.GC.CA<br>
+    ALL DATA IS PUBLICLY AVAILABLE GOVERNMENT DISCLOSURE INFORMATION.
+  </footer>
+
+</div>
+<script>
+function switchTab(el, tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  const panels = ['panelCongress','panelHedge','panelSAM','panelCanada'];
+  const grid = document.getElementById('mainGrid');
+  const analysis = document.getElementById('panelAnalysis');
+  const map = {congress:'panelCongress',hedge:'panelHedge',sam:'panelSAM',canada:'panelCanada'};
+  if (tab === 'all') {
+    grid.style.display = 'grid'; analysis.style.display = 'block';
+    panels.forEach(p => document.getElementById(p).style.display = 'block');
+  } else if (tab === 'analysis') {
+    grid.style.display = 'none'; analysis.style.display = 'block';
+  } else {
+    grid.style.display = 'grid'; analysis.style.display = 'none';
+    panels.forEach(p => { document.getElementById(p).style.display = map[tab]===p ? 'block':'none'; });
+  }
+}
+
+async function runSearch() {
+  const q = document.getElementById('searchInput').value.trim();
+  if (!q) return;
+  setLoading();
+  document.getElementById('lastUpdate').textContent = 'Updated: ' + new Date().toLocaleTimeString();
+  const [c,h,s,ca] = await Promise.allSettled([
+    fetchAPI('/api/congress?q='+encodeURIComponent(q)).then(d=>d.trades||[]),
+    fetchAPI('/api/hedge?q='+encodeURIComponent(q)).then(d=>d.holdings||[]),
+    fetchAPI('/api/sam?q='+encodeURIComponent(q)).then(d=>d.contracts||[]),
+    fetchAPI('/api/canada?q='+encodeURIComponent(q)).then(d=>d.contracts||[]),
+  ]);
+  const results = {
+    query:q,
+    congress: c.status==='fulfilled'?c.value:[],
+    hedge:    h.status==='fulfilled'?h.value:[],
+    sam:      s.status==='fulfilled'?s.value:[],
+    canada:   ca.status==='fulfilled'?ca.value:[],
+  };
+  renderCongress(results.congress, q);
+  renderHedge(results.hedge, q);
+  renderSAM(results.sam, q);
+  renderCanada(results.canada, q);
+  generateAnalysis(results);
+}
+
+async function loadRecent() {
+  setLoading();
+  document.getElementById('lastUpdate').textContent = 'Updated: ' + new Date().toLocaleTimeString();
+  const data = await fetchAPI('/api/congress?q=').then(d=>d.trades||[]).catch(()=>[]);
+  renderCongress(data, '');
+  ['hedgeData','samData','canadaData'].forEach(id => {
+    document.getElementById(id).innerHTML = '<div class="empty-state">Enter a ticker above to search this stream.</div>';
+  });
+  document.getElementById('analysisData').innerHTML = '<div class="empty-state">Run a specific search to generate cross-reference analysis.</div>';
+}
+
+function setLoading() {
+  ['congressData','hedgeData','samData','canadaData','analysisData'].forEach(id => {
+    document.getElementById(id).innerHTML = '<div class="loading">scanning...</div>';
+  });
+}
+
+async function fetchAPI(url) {
+  const res = await fetch(url);
+  return res.json();
+}
+
+function renderCongress(trades, q) {
+  const el = document.getElementById('congressData');
+  if (!trades.length) { el.innerHTML = `<div class="empty-state">No congressional disclosures found for "${q}".</div>`; return; }
+  el.innerHTML = trades.slice(0,15).map(t => `
+    <div class="trade-item">
+      <div class="trade-ticker">${esc(t.ticker||'—')}</div>
+      <div class="trade-meta">
+        <div class="trade-name">${esc(t.asset_description||t.ticker||'')}</div>
+        <div class="trade-detail">${esc(t.representative||t.senator||'Unknown')} · ${esc(t.transaction_date||'')}</div>
+      </div>
+      <div class="trade-amount ${(t.type||'').toLowerCase().includes('sale')?'amount-sell':'amount-buy'}">
+        ${esc(t.type||'Trade')}<br><span style="font-size:0.6rem;color:var(--muted)">${esc(t.amount||'')}</span>
+      </div>
+    </div>`).join('');
+}
+
+function renderHedge(holdings, q) {
+  const el = document.getElementById('hedgeData');
+  if (!holdings.length) { el.innerHTML = `<div class="empty-state">No major fund holdings found for "${q}".<br>Try the exact ticker symbol.</div>`; return; }
+  el.innerHTML = holdings.slice(0,10).map(h => `
+    <div class="fund-item">
+      <div class="fund-name">${esc(h.fund_name||h.name||'')}</div>
+      <div class="trade-detail">${esc(h.filing_date||'')} · ${esc((h.shares||0).toLocaleString())} shares · $${esc((h.value||0).toLocaleString())}K</div>
+      ${h.top_holdings?`<div class="fund-holdings">${h.top_holdings.map(s=>`<span class="holding-tag">${esc(s)}</span>`).join('')}</div>`:''}
+    </div>`).join('');
+}
+
+function renderSAM(contracts, q) {
+  const el = document.getElementById('samData');
+  if (!contracts.length) { el.innerHTML = `<div class="empty-state">No US government contracts found for "${q}".</div>`; return; }
+  el.innerHTML = contracts.slice(0,10).map(c => `
+    <div class="contract-item">
+      <div class="contract-name">${esc(c.vendorName||c.awardee||'Unknown')}</div>
+      <div class="contract-detail">${esc(c.agencyName||'')} · ${esc(c.award_date||c.date||'')}<br>${esc(c.description||c.title||'')}</div>
+      <div class="contract-amount">${fmtAmt(c.award_amount||c.amount)}</div>
+    </div>`).join('');
+}
+
+function renderCanada(contracts, q) {
+  const el = document.getElementById('canadaData');
+  if (!contracts.length) { el.innerHTML = `<div class="empty-state">No Canadian federal contracts found for "${q}".</div>`; return; }
+  el.innerHTML = contracts.slice(0,10).map(c => `
+    <div class="contract-item">
+      <div class="contract-name">${esc(c.vendor_name||c.supplier_name||'Unknown')}</div>
+      <div class="contract-detail">${esc(c.department||c.owner_org||'')} · ${esc(c.contract_date||c.award_date||'')}<br>${esc(c.description_en||c.description||'')}</div>
+      <div class="contract-amount">${fmtAmt(c.contract_value||c.value)}</div>
+    </div>`).join('');
+}
+
+async function generateAnalysis(results) {
+  const el = document.getElementById('analysisData');
+  el.innerHTML = '<div class="loading">generating cross-reference intelligence...</div>';
+  try {
+    const res = await fetch('/api/analyze-panopticon', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(results)
+    });
+    const data = await res.json();
+    el.innerHTML = data.result
+      ? `<div class="analysis-output">${marked.parse(data.result)}</div>`
+      : '<div class="empty-state">Analysis failed. Try again.</div>';
+  } catch(err) {
+    el.innerHTML = '<div class="empty-state">Analysis error.</div>';
+  }
+}
+
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function fmtAmt(v) {
+  if (!v) return '—';
+  const n = parseFloat(String(v).replace(/[^0-9.]/g,''));
+  if (isNaN(n)) return String(v);
+  if (n>=1e9) return '$'+(n/1e9).toFixed(2)+'B';
+  if (n>=1e6) return '$'+(n/1e6).toFixed(2)+'M';
+  if (n>=1e3) return '$'+(n/1e3).toFixed(0)+'K';
+  return '$'+n.toFixed(0);
+}
+document.getElementById('searchInput').addEventListener('keydown', e => { if(e.key==='Enter') runSearch(); });
+</script>
+</body>
+</html>

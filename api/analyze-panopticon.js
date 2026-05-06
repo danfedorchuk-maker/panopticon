@@ -1,0 +1,120 @@
+// api/analyze-panopticon.js — Panopticon
+// Takes all four data streams and generates a cross-reference intelligence report
+
+const handler = async (req, res) => {
+  if (req.method !== 'POST') return res.status(405).json({ result: 'Method not allowed.' });
+
+  const groqKey = process.env.GROQ_API_KEY;
+  if (!groqKey) return res.status(200).json({ result: 'SYSTEM ERROR: GROQ_API_KEY missing.' });
+
+  const { query, congress = [], hedge = [], sam = [], canada = [] } = req.body || {};
+
+  if (!query) return res.status(200).json({ result: 'No search query provided.' });
+
+  // Build context from all four streams
+  const today = new Date().toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+
+  let context = `PANOPTICON INTELLIGENCE REPORT — ${today}\nSearch Query: "${query}"\n\n`;
+
+  // Congressional trades
+  if (congress.length > 0) {
+    context += `## CONGRESSIONAL TRADES (${congress.length} disclosures)\n`;
+    congress.slice(0,10).forEach(t => {
+      context += `- ${t.representative || t.senator || 'Unknown'} (${t.party || '?'}) — ${t.type || 'Trade'} ${t.ticker || ''} — ${t.amount || 'undisclosed'} on ${t.transaction_date || '?'}\n`;
+    });
+    context += '\n';
+  } else {
+    context += `## CONGRESSIONAL TRADES\nNo disclosures found for "${query}".\n\n`;
+  }
+
+  // Hedge fund holdings
+  if (hedge.length > 0) {
+    context += `## HEDGE FUND 13F HOLDINGS (${hedge.length} funds)\n`;
+    hedge.slice(0,8).forEach(h => {
+      context += `- ${h.fund_name || 'Unknown Fund'} — ${h.shares ? h.shares.toLocaleString() + ' shares' : 'position reported'} as of ${h.filing_date || '?'}\n`;
+    });
+    context += '\n';
+  } else {
+    context += `## HEDGE FUND HOLDINGS\nNo major fund positions found for "${query}".\n\n`;
+  }
+
+  // US government contracts
+  if (sam.length > 0) {
+    context += `## US GOVERNMENT CONTRACTS (${sam.length} awards)\n`;
+    sam.slice(0,8).forEach(c => {
+      const amt = c.award_amount ? `$${parseFloat(c.award_amount).toLocaleString()}` : 'undisclosed';
+      context += `- ${c.vendorName || 'Unknown'} — ${c.agencyName || '?'} — ${amt} — ${c.award_date || '?'}\n  ${c.description || ''}\n`;
+    });
+    context += '\n';
+  } else {
+    context += `## US GOVERNMENT CONTRACTS\nNo federal contracts found for "${query}".\n\n`;
+  }
+
+  // Canadian contracts
+  if (canada.length > 0) {
+    context += `## CANADIAN FEDERAL CONTRACTS (${canada.length} awards)\n`;
+    canada.slice(0,8).forEach(c => {
+      const amt = c.contract_value ? `$${parseFloat(c.contract_value).toLocaleString()} CAD` : 'undisclosed';
+      context += `- ${c.vendor_name || 'Unknown'} — ${c.department || '?'} — ${amt} — ${c.contract_date || '?'}\n  ${c.description || ''}\n`;
+    });
+    context += '\n';
+  } else {
+    context += `## CANADIAN FEDERAL CONTRACTS\nNo Canadian federal contracts found for "${query}".\n\n`;
+  }
+
+  try {
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${groqKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        max_tokens: 1500,
+        temperature: 0.4,
+        messages: [
+          {
+            role: 'system',
+            content: `You are Panopticon, an institutional intelligence analyst specializing in cross-referencing congressional stock trades, hedge fund positions, and government contracts to identify potential patterns, conflicts of interest, and investment signals.
+
+Your analysis is factual, precise, and based only on the data provided. You are NOT a financial advisor. You identify patterns and correlations in public disclosure data for research purposes.
+
+Structure your analysis as:
+## EXECUTIVE SUMMARY
+2-3 sentence summary of key findings.
+
+## CONGRESSIONAL POSITIONING
+What are politicians doing with this stock/company? Any notable timing relative to contracts or legislation?
+
+## INSTITUTIONAL SMART MONEY
+What do major hedge funds signal about this position?
+
+## GOVERNMENT CONTRACT EXPOSURE
+What is the company's exposure to government contracts? US and Canada?
+
+## CROSS-REFERENCE SIGNALS
+The most important finding — are there any correlations between congressional trades, fund positioning, and contract awards that warrant attention?
+
+## RISK FLAGS
+Any patterns that suggest information asymmetry or unusual timing?
+
+Keep it dense and analytical. Today is ${today}.`
+          },
+          {
+            role: 'user',
+            content: `Analyze the following public disclosure data for "${query}" and generate a cross-reference intelligence report:\n\n${context}`
+          }
+        ]
+      })
+    });
+
+    const data = await response.json();
+    if (data.choices?.[0]?.message) {
+      return res.status(200).json({ result: data.choices[0].message.content });
+    }
+    return res.status(200).json({ result: 'Analysis error: ' + JSON.stringify(data) });
+
+  } catch (err) {
+    return res.status(200).json({ result: 'Network error: ' + err.message });
+  }
+};
+
+module.exports = handler;
