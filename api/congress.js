@@ -1,84 +1,78 @@
 // api/congress.js — Panopticon
-// Fetches congressional stock trade disclosures from House Stock Watcher API
-// Free, no key required, updated daily
+// Congressional stock trades from multiple sources
 
 const handler = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   const query = (req.query.q || '').trim().toUpperCase();
 
-  try {
-    // House Stock Watcher API — returns recent trades, optionally filtered by ticker
-    const url = query
-      ? `https://housestockwatcher.com/api/transactions/ticker/${query}`
-      : `https://housestockwatcher.com/api/transactions`;
+  // Try multiple sources in order
+  const sources = [
+    // House Stock Watcher S3 - paginated JSON files
+    async () => {
+      const url = 'https://house-stock-watcher-data.s3-us-west-2.amazonaws.com/data/all_transactions.json';
+      const r = await fetch(url, { headers: {'User-Agent':'Mozilla/5.0'}, signal: AbortSignal.timeout(12000) });
+      if (!r.ok) throw new Error(`S3: ${r.status}`);
+      const data = await r.json();
+      return { trades: Array.isArray(data) ? data : [], source: 'House Stock Watcher S3' };
+    },
+    // Senate Stock Watcher S3
+    async () => {
+      const url = 'https://senate-stock-watcher-data.s3-us-west-2.amazonaws.com/aggregate/all_transactions.json';
+      const r = await fetch(url, { headers: {'User-Agent':'Mozilla/5.0'}, signal: AbortSignal.timeout(12000) });
+      if (!r.ok) throw new Error(`Senate S3: ${r.status}`);
+      const data = await r.json();
+      return { trades: Array.isArray(data) ? data : [], source: 'Senate Stock Watcher S3' };
+    },
+    // House Stock Watcher API
+    async () => {
+      const url = query
+        ? `https://housestockwatcher.com/api/transactions/ticker/${query}`
+        : `https://housestockwatcher.com/api/transactions`;
+      const r = await fetch(url, { headers: {'User-Agent':'Mozilla/5.0'}, signal: AbortSignal.timeout(10000) });
+      if (!r.ok) throw new Error(`HSW: ${r.status}`);
+      const data = await r.json();
+      return { trades: Array.isArray(data) ? data : (data.transactions || []), source: 'House Stock Watcher API' };
+    },
+  ];
 
-    const response = await fetch(url, {
-      headers: { 'User-Agent': 'Panopticon/1.0' },
-      signal: AbortSignal.timeout(10000)
-    });
+  let trades = [];
+  let source = 'unavailable';
 
-    if (!response.ok) throw new Error(`House Stock Watcher: ${response.status}`);
-    const data = await response.json();
-
-    // Normalize the data
-    let trades = Array.isArray(data) ? data : (data.transactions || data.data || []);
-
-    // If not searching by ticker, filter by company name if query provided
-    if (query && !url.includes('/ticker/')) {
-      trades = trades.filter(t =>
-        (t.asset_description || '').toLowerCase().includes(query.toLowerCase()) ||
-        (t.ticker || '').toUpperCase().includes(query)
-      );
-    }
-
-    // Sort by most recent first
-    trades.sort((a, b) => new Date(b.transaction_date || 0) - new Date(a.transaction_date || 0));
-
-    // Normalize fields
-    const normalized = trades.slice(0, 50).map(t => ({
-      ticker:           t.ticker || '—',
-      asset_description: t.asset_description || t.ticker || '—',
-      representative:   t.representative || t.name || 'Unknown',
-      transaction_date: t.transaction_date || t.disclosure_date || '—',
-      type:             t.type || t.transaction_type || '—',
-      amount:           t.amount || '—',
-      party:            t.party || '—',
-      state:            t.state || '—',
-      district:         t.district || '—',
-    }));
-
-    return res.status(200).json({ trades: normalized, source: 'House Stock Watcher', count: normalized.length });
-
-  } catch (err) {
-    // Fallback: try Senate Stock Watcher if House fails
+  for (const fn of sources) {
     try {
-      const senateUrl = query
-        ? `https://senatestockwatcher.com/api/transactions/ticker/${query}`
-        : `https://senatestockwatcher.com/api/transactions`;
-
-      const senateRes = await fetch(senateUrl, {
-        headers: { 'User-Agent': 'Panopticon/1.0' },
-        signal: AbortSignal.timeout(8000)
-      });
-
-      if (senateRes.ok) {
-        const senateData = await senateRes.json();
-        let trades = Array.isArray(senateData) ? senateData : (senateData.transactions || []);
-        trades.sort((a,b) => new Date(b.transaction_date||0) - new Date(a.transaction_date||0));
-        const normalized = trades.slice(0,50).map(t => ({
-          ticker:           t.ticker || '—',
-          asset_description: t.asset_description || t.ticker || '—',
-          senator:          t.senator || t.name || 'Unknown',
-          transaction_date: t.transaction_date || '—',
-          type:             t.type || '—',
-          amount:           t.amount || '—',
-        }));
-        return res.status(200).json({ trades: normalized, source: 'Senate Stock Watcher', count: normalized.length });
-      }
-    } catch {}
-
-    return res.status(200).json({ trades: [], error: err.message, source: 'Congressional API unavailable' });
+      const result = await fn();
+      trades = result.trades;
+      source = result.source;
+      if (trades.length > 0) break;
+    } catch (e) {
+      continue;
+    }
   }
+
+  // Filter by query
+  if (query && trades.length > 0) {
+    trades = trades.filter(t =>
+      (t.ticker || '').toUpperCase() === query ||
+      (t.ticker || '').toUpperCase().includes(query) ||
+      (t.asset_description || '').toUpperCase().includes(query)
+    );
+  }
+
+  // Sort and normalize
+  trades.sort((a,b) => new Date(b.transaction_date||0) - new Date(a.transaction_date||0));
+
+  const normalized = trades.slice(0,30).map(t => ({
+    ticker:            t.ticker || '—',
+    asset_description: t.asset_description || t.ticker || '—',
+    representative:    t.representative || t.senator || t.name || 'Unknown',
+    transaction_date:  t.transaction_date || t.disclosure_date || '—',
+    type:              t.type || t.transaction_type || '—',
+    amount:            t.amount || '—',
+    party:             t.party || '—',
+    state:             t.state || '—',
+  }));
+
+  return res.status(200).json({ trades: normalized, source, count: normalized.length });
 };
 
 module.exports = handler;
