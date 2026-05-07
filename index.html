@@ -3,10 +3,154 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PANOPTICON — Market Intelligence</title>
+<title>PANOPTICON</title>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f5f6f8;--surface:#fff;--border:#d8dce3;--border-light:#e8ebf0;--accent:#2563eb;--accent2:#d97706;--text:#1a1f2e;--text-secondary:#4b5563;--muted:#9ca3af;--danger:#dc2626;--success:#059669;--shadow:0 1px 3px rgba(0,0,0,.08)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-serif;min-height:100vh}
+.wrap{max-width:1400px;margin:0 auto;padding:0 24px 60px}
+header{padding:28px 0 24px;border-bottom:2px solid var(--border);margin-bottom:32px;display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:16px}
+.logo{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:2rem;color:var(--text)}
+.logo span{color:var(--accent)}
+.tagline{font-family:'IBM Plex Mono',monospace;font-size:.62rem;color:var(--muted);letter-spacing:.18em;margin-top:7px}
+.header-right{display:flex;flex-direction:column;align-items:flex-end;gap:10px}
+.header-meta{font-family:'IBM Plex Mono',monospace;font-size:.62rem;color:var(--text-secondary);text-align:right;line-height:2;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:10px 14px}
+.live-dot{display:inline-block;width:7px;height:7px;background:var(--success);border-radius:50%;margin-right:5px;animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+.lang-toggle{display:flex;border:1.5px solid var(--border);border-radius:6px;overflow:hidden;background:var(--surface)}
+.lang-btn{padding:7px 16px;border:none;background:transparent;color:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:.75rem;font-weight:600;cursor:pointer}
+.lang-btn.active{background:var(--accent);color:#fff}
+.search-label{font-family:'IBM Plex Mono',monospace;font-size:.62rem;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;margin-bottom:10px}
+.search-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:28px}
+.search-input{flex:1;min-width:220px;background:var(--surface);border:1.5px solid var(--border);border-radius:6px;color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:1rem;padding:13px 18px;outline:none}
+.search-input:focus{border-color:var(--accent)}
+.btn{background:var(--accent);border:none;color:#fff;font-family:'IBM Plex Sans',sans-serif;font-size:.82rem;font-weight:600;padding:13px 22px;border-radius:6px;cursor:pointer;white-space:nowrap}
+.btn:hover{background:#1d4ed8}
+.btn-orange{background:var(--accent2)}
+.btn-orange:hover{background:#b45309}
+.stream-tabs{display:flex;border-bottom:2px solid var(--border);margin-bottom:24px;overflow-x:auto;gap:2px}
+.tab{font-family:'IBM Plex Sans',sans-serif;font-size:.72rem;font-weight:500;padding:10px 18px;border:none;background:transparent;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;white-space:nowrap;border-radius:4px 4px 0 0}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent);background:var(--surface);font-weight:700}
+.panel-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+@media(max-width:900px){.panel-grid{grid-template-columns:1fr}}
+.panel,.panel-full{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px}
+.panel{min-height:300px}
+.panel-full{margin-bottom:16px}
+.panel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border-light)}
+.panel-title{font-family:'IBM Plex Sans',sans-serif;font-size:.72rem;letter-spacing:.06em;color:var(--text-secondary);font-weight:700}
+.panel-badge{font-family:'IBM Plex Mono',monospace;font-size:.58rem;padding:3px 8px;border-radius:4px;font-weight:600}
+.badge-purple{background:#ede9fe;color:#7c3aed;border:1px solid #c4b5fd}
+.badge-orange{background:#fef3c7;color:#d97706;border:1px solid #fcd34d}
+.badge-blue{background:#e0f2fe;color:#0284c7;border:1px solid #7dd3fc}
+.badge-green{background:#d1fae5;color:#059669;border:1px solid #6ee7b7}
+.trade-item{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid var(--border-light)}
+.trade-item:last-child{border-bottom:none}
+.trade-ticker{font-family:'IBM Plex Mono',monospace;font-size:.82rem;font-weight:700;color:var(--accent);min-width:60px;background:#eff6ff;padding:3px 7px;border-radius:4px;text-align:center}
+.trade-meta{flex:1}
+.trade-name{font-size:.8rem;color:var(--text);margin-bottom:2px;font-weight:500}
+.trade-detail{font-family:'IBM Plex Mono',monospace;font-size:.62rem;color:var(--muted)}
+.trade-amount{font-family:'IBM Plex Mono',monospace;font-size:.72rem;text-align:right;font-weight:600}
+.amount-buy{color:var(--success)}
+.amount-sell{color:var(--danger)}
+.contract-item{padding:10px 0;border-bottom:1px solid var(--border-light)}
+.contract-item:last-child{border-bottom:none}
+.contract-name{font-size:.84rem;color:var(--text);margin-bottom:3px;font-weight:600}
+.contract-detail{font-family:'IBM Plex Mono',monospace;font-size:.61rem;color:var(--text-secondary);line-height:1.7}
+.contract-amount{font-family:'IBM Plex Mono',monospace;font-size:.78rem;color:var(--accent2);margin-top:4px;font-weight:700}
+.fund-item{padding:10px 0;border-bottom:1px solid var(--border-light)}
+.fund-item:last-child{border-bottom:none}
+.fund-name{font-size:.84rem;color:var(--text);font-weight:600;margin-bottom:4px}
+.fund-holdings{display:flex;flex-wrap:wrap;gap:5px;margin-top:5px}
+.holding-tag{font-family:'IBM Plex Mono',monospace;font-size:.58rem;padding:2px 7px;border-radius:3px;background:#e0f2fe;color:#0284c7;border:1px solid #bae6fd;font-weight:600}
+.analysis-output{font-size:.9rem;color:var(--text);line-height:1.8}
+.analysis-output h1,.analysis-output h2,.analysis-output h3{color:var(--accent);font-size:.78rem;margin:18px 0 8px;font-weight:700;padding-bottom:5px;border-bottom:1px solid var(--border-light)}
+.analysis-output p{margin-bottom:10px;color:var(--text-secondary)}
+.analysis-output strong{color:var(--text)}
+.empty-state{font-family:'IBM Plex Sans',sans-serif;font-size:.78rem;color:var(--muted);text-align:center;padding:40px 20px;line-height:2}
+.loading{font-family:'IBM Plex Mono',monospace;font-size:.7rem;color:var(--accent);text-align:center;padding:40px 20px;animation:pulse 1.5s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+footer{border-top:1px solid var(--border);padding-top:20px;margin-top:40px;font-family:'IBM Plex Sans',sans-serif;font-size:.62rem;color:var(--muted);text-align:center;line-height:2}
+@media(max-width:640px){.wrap{padding:0 14px 40px}header{flex-direction:column;align-items:flex-start}.header-right{align-items:flex-start;width:100%}.logo{font-size:1.5rem}.search-row{flex-direction:column}.search-input,.btn{width:100%}.panel-grid{grid-template-columns:1fr}.panel{min-height:unset;padding:16px}.panel-full{padding:16px}}
+</style>
 </head>
 <body>
-<h1>PANOPTICON</h1>
-<p>Working!</p>
+<div class="wrap">
+<header>
+<div>
+<div class="logo">PAN<span>OPTICON</span></div>
+<div class="tagline" id="tagline"></div>
+</div>
+<div class="header-right">
+<div class="lang-toggle">
+<button class="lang-btn" id="btnEN" onclick="setLang('en')">EN</button>
+<button class="lang-btn active" id="btnZH" onclick="setLang('zh')">&#32321;&#20013;</button>
+</div>
+<div class="header-meta">
+<span class="live-dot"></span><span id="liveLabel"></span><br>
+<span id="streamsLabel"></span><br>
+<span id="lastUpdate">&#8212;</span>
+</div>
+</div>
+</header>
+<div class="search-label" id="searchLabel"></div>
+<div class="search-row">
+<input type="text" class="search-input" id="searchInput">
+<button class="btn" id="btnScan" onclick="runSearch()"></button>
+<button class="btn btn-orange" id="btnRecent" onclick="loadRecent()"></button>
+</div>
+<div class="stream-tabs">
+<button class="tab active" onclick="switchTab(this,'all')" id="tab-all"></button>
+<button class="tab" onclick="switchTab(this,'congress')" id="tab-congress"></button>
+<button class="tab" onclick="switchTab(this,'hedge')" id="tab-hedge"></button>
+<button class="tab" onclick="switchTab(this,'sam')" id="tab-sam"></button>
+<button class="tab" onclick="switchTab(this,'canada')" id="tab-canada"></button>
+<button class="tab" onclick="switchTab(this,'analysis')" id="tab-analysis"></button>
+</div>
+<div class="panel-grid" id="mainGrid">
+<div class="panel" id="panelCongress">
+<div class="panel-header"><div class="panel-title" id="title-congress"></div><span class="panel-badge badge-purple" id="badge-congress"></span></div>
+<div id="congressData" class="empty-state"></div>
+</div>
+<div class="panel" id="panelHedge">
+<div class="panel-header"><div class="panel-title" id="title-hedge"></div><span class="panel-badge badge-blue">SEC EDGAR</span></div>
+<div id="hedgeData" class="empty-state"></div>
+</div>
+<div class="panel" id="panelSAM">
+<div class="panel-header"><div class="panel-title" id="title-sam"></div><span class="panel-badge badge-orange">SAM.GOV</span></div>
+<div id="samData" class="empty-state"></div>
+</div>
+<div class="panel" id="panelCanada">
+<div class="panel-header"><div class="panel-title" id="title-canada"></div><span class="panel-badge badge-green">BUYANDSELL.GC.CA</span></div>
+<div id="canadaData" class="empty-state"></div>
+</div>
+</div>
+<div class="panel-full" id="panelAnalysis">
+<div class="panel-header"><div class="panel-title" id="title-analysis"></div><span class="panel-badge badge-purple">GROQ &#8212; LLAMA 3.3 70B</span></div>
+<div id="analysisData" class="empty-state"></div>
+</div>
+<footer id="footerText"></footer>
+</div>
+<script>
+var T={en:{tagline:"INTELLIGENCE SURVEILLANCE TERMINAL - FOLLOWING THE MONEY",live:"LIVE DATA STREAMS ACTIVE",streams:"CONGRESSIONAL - HEDGE FUNDS - US CONTRACTS - CA CONTRACTS",searchLabel:"SEARCH COMPANY OR TICKER",placeholder:"e.g. PLTR, Raytheon, Lockheed, Palantir, Microsoft...",btnScan:"SCAN ALL STREAMS",btnRecent:"RECENT ACTIVITY",tabAll:"ALL STREAMS",tabCongress:"CONGRESSIONAL TRADES",tabHedge:"HEDGE FUNDS 13F",tabSam:"US CONTRACTS",tabCanada:"CANADA CONTRACTS",tabAnalysis:"AI CROSS-REFERENCE",titleCongress:"CONGRESSIONAL TRADES",badgeCongress:"STOCK ACT DISCLOSURES",titleHedge:"HEDGE FUND 13F FILINGS",titleSam:"US GOVERNMENT CONTRACTS",titleCanada:"CANADA FEDERAL CONTRACTS",titleAnalysis:"AI CROSS-REFERENCE ANALYSIS",emptyCongress:"Enter a ticker or click RECENT ACTIVITY to see the latest congressional trades.",emptyHedge:"Search a ticker to see which major funds hold this position.",emptySam:"Search a company name to find federal contract awards.",emptyCanada:"Search a company name to find Canadian federal contract awards.",emptyAnalysis:"Run a search to generate a cross-reference intelligence report.",loading:"scanning...",loadingAnalysis:"generating cross-reference intelligence...",recentOther:"Enter a ticker above to search this stream.",recentAnalysis:"Run a specific search to generate cross-reference analysis.",updated:"Updated: ",analysisFail:"Analysis failed. Try again.",analysisError:"Analysis error.",footer:"PANOPTICON - FOR RESEARCH AND EDUCATIONAL PURPOSES ONLY. NOT FINANCIAL ADVICE.",systemPrompt:"You are Panopticon, an institutional intelligence analyst. Analyze the following public data and write a detailed cross-reference intelligence report IN ENGLISH. Identify connections between congressional trades, hedge fund 13F positions, and government contracts. Be factual. Use markdown headers."},zh:{tagline:"&#24773;&#22577;&#30418;&#25511;&#32066;&#31471; - &#36319;&#36�;&#36039;&#37329;&#27969;&#21521;",live:"&#21363;&#26178;&#25976;&#25836;&#27969;&#21551;&#21160;&#20013;",streams:"&#22283;&#26371;&#20132;&#26131; - &#23565;&#27885;&#22522;&#37329; - &#32654;&#22283;&#21512;&#21516; - &#21152;&#25343;&#22823;&#21512;&#21516;",searchLabel:"&#25628;&#32034;&#20844;&#21496;&#25110;&#32937;&#31080;&#20195;&#30908;",placeholder:"&#20363;&#22914;&#65306;PLTR&#12289;&#38563;&#31070;&#12289;&#27931;&#20811;&#24678;&#24503;&#12289;&#24115;&#20848;&#25552;&#29246;&#12289;&#24494;&#36719;...",btnScan:"&#25195;&#25551;&#25152;&#26377;&#25976;&#25836;&#27969;",btnRecent:"&#26368;&#26032;&#21205;&#24907;",tabAll:"&#25152;&#26377;&#25976;&#25836;&#27969;",tabCongress:"&#22283;&#26371;&#20132;&#26131;",tabHedge:"&#23565;&#27885;&#22522;&#37329; 13F",tabSam:"&#32654;&#22283;&#25919;&#24220;&#21512;&#21516;",tabCanada:"&#21152;&#25343;&#22823;&#21512;&#21516;",tabAnalysis:"AI &#20132;&#21449;&#20998;&#26512;",titleCongress:"&#22283;&#26371;&#20132;&#26131;&#35352;&#37636;",badgeCongress:"&#32923;&#31080;&#27861;&#25披;&#38706;",titleHedge:"&#23565;&#27885;&#22522;&#37329; 13F &#30003;&#22831;",titleSam:"&#32654;&#22283;&#25919;&#24220;&#21512;&#21516;",titleCanada:"&#21152;&#25343;&#22823;&#32299;&#37030;&#21512;&#21516;",titleAnalysis:"AI &#20132;&#21449;&#21443;&#32771;&#20998;&#26512;",emptyCongress:"&#36953;&#20837;&#32937;&#31080;&#20195;&#30908;&#25110;&#40670;&#20551;&#12300;&#26368;&#26032;&#21205;&#24907;&#12301;&#65292;&#26597;&#30475;&#26368;&#26032;&#22283;&#26371;&#20132;&#26131;&#35352;&#37636;&#12290;",emptyHedge:"&#25628;&#32034;&#32937;&#31080;&#20195;&#30908;&#65292;&#26597;&#30475;&#20027;&#35201;&#22522;&#37329;&#30340;&#25345;&#20倉;&#24773;&#20917;&#12290;",emptySam:"&#25628;&#32034;&#20844;&#21496;&#21517;&#31281;&#65292;&#26597;&#25214;&#32654;&#22283;&#32299;&#37030;&#21512;&#21516;&#25480;&#20104;&#24773;&#20917;&#12290;",emptyCanada:"&#25628;&#32034;&#20844;&#21496;&#21517;&#31281;&#65292;&#26597;&#25214;&#21152;&#25343;&#22823;&#32299;&#37030;&#21512;&#21516;&#25480;&#20104;&#24773;&#20917;&#12290;",emptyAnalysis:"&#25191;&#34892;&#25628;&#32034;&#20197;&#29983;&#25104;&#20132;&#21449;&#21443;&#32771;&#24773;&#22577;&#22577;&#21578;&#12290;",loading:"&#25195;&#25551;&#20013;...",loadingAnalysis:"&#27491;&#22312;&#29983;&#25104;&#20132;&#21449;&#21443;&#32771;&#24773;&#22577;&#20998;&#26512;...",recentOther:"&#35531;&#22312;&#19978;&#26041;&#36953;&#20837;&#32937;&#31080;&#20195;&#30908;&#20197;&#25628;&#32034;&#27492;&#25976;&#25836;&#27969;&#12290;",recentAnalysis:"&#35531;&#25191;&#34892;&#29305;&#23450;&#25628;&#32034;&#20197;&#29983;&#25104;&#20132;&#21449;&#21443;&#32771;&#20998;&#26512;&#12290;",updated:"&#26356;&#26032;&#26178;&#38291;&#65306;",analysisFail:"&#20998;&#26512;&#22833;&#25215;&#65292;&#35531;&#37325;&#35430;&#12290;",analysisError:"&#20998;&#26512;&#20986;&#37619;&#65292;&#35531;&#37325;&#35430;&#12290;",footer:"&#20840;&#26657;&#30418;&#25511;&#31995;&#32113; - &#20僅;&#20379;&#30740;&#31350;&#21450;&#25945;&#32946;&#29992;&#36884;&#65292;&#19981;&#26699;&#25104;&#25237;&#36039;&#24314;&#35611;&#12290;",systemPrompt:"&#20320;&#26159;&#19968;&#20491;&#37329;&#34701;&#24773;&#22577;&#20998;&#26512;&#24311;&#12290;&#35531;&#20197;&#32321;&#39636;&#20013;&#25991;&#20998;&#26512;&#20197;&#19979;&#20844;&#39280;&#25976;&#25836;&#65292;&#25512;&#24113;&#19968;&#20221;&#35443;&#32048;&#30340;&#20132;&#21449;&#21443;&#32771;&#24773;&#22577;&#22577;&#21578;&#12290;&#35657;&#21029;&#22283;&#26371;&#20132;&#26131;&#12289;&#23565;&#27885;&#22522;&#37329;13F&#25345;&#20倉;&#33287;&#25919;&#24220;&#21512;&#21516;&#20043;&#38291;&#30340;&#38364;&#32737;&#12290;&#35531;&#20197;&#20107;&#23526;&#28858;&#20381;&#25454;&#65292;&#20351;&#29992;Markdown&#26631;&#39064;&#26684;&#24335;&#20998;&#31680;&#25300;&#24424;&#12290;"}};
+var lang="zh";
+function setLang(l){lang=l;var t=T[l];document.getElementById("btnEN").className="lang-btn"+(l==="en"?" active":"");document.getElementById("btnZH").className="lang-btn"+(l==="zh"?" active":"");document.getElementById("tagline").innerHTML=t.tagline;document.getElementById("liveLabel").innerHTML=t.live;document.getElementById("streamsLabel").innerHTML=t.streams;document.getElementById("searchLabel").innerHTML=t.searchLabel;document.getElementById("searchInput").placeholder=t.placeholder;document.getElementById("btnScan").textContent=t.btnScan;document.getElementById("btnRecent").textContent=t.btnRecent;document.getElementById("tab-all").textContent=t.tabAll;document.getElementById("tab-congress").textContent=t.tabCongress;document.getElementById("tab-hedge").textContent=t.tabHedge;document.getElementById("tab-sam").textContent=t.tabSam;document.getElementById("tab-canada").textContent=t.tabCanada;document.getElementById("tab-analysis").textContent=t.tabAnalysis;document.getElementById("title-congress").textContent=t.titleCongress;document.getElementById("badge-congress").textContent=t.badgeCongress;document.getElementById("title-hedge").textContent=t.titleHedge;document.getElementById("title-sam").textContent=t.titleSam;document.getElementById("title-canada").textContent=t.titleCanada;document.getElementById("title-analysis").textContent=t.titleAnalysis;document.getElementById("footerText").innerHTML=t.footer;document.getElementById("congressData").innerHTML="<div class='empty-state'>"+t.emptyCongress+"</div>";document.getElementById("hedgeData").innerHTML="<div class='empty-state'>"+t.emptyHedge+"</div>";document.getElementById("samData").innerHTML="<div class='empty-state'>"+t.emptySam+"</div>";document.getElementById("canadaData").innerHTML="<div class='empty-state'>"+t.emptyCanada+"</div>";document.getElementById("analysisData").innerHTML="<div class='empty-state'>"+t.emptyAnalysis+"</div>"}
+setLang("zh");
+function switchTab(el,tab){document.querySelectorAll(".tab").forEach(function(t){t.classList.remove("active")});el.classList.add("active");var panels=["panelCongress","panelHedge","panelSAM","panelCanada"];var grid=document.getElementById("mainGrid");var analysis=document.getElementById("panelAnalysis");var map={congress:"panelCongress",hedge:"panelHedge",sam:"panelSAM",canada:"panelCanada"};if(tab==="all"){grid.style.display="grid";analysis.style.display="block";panels.forEach(function(p){document.getElementById(p).style.display="block"})}else if(tab==="analysis"){grid.style.display="none";analysis.style.display="block"}else{grid.style.display="grid";analysis.style.display="none";panels.forEach(function(p){document.getElementById(p).style.display=map[tab]===p?"block":"none"})}}
+function esc(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}
+function fmtAmt(v){if(!v)return"&#8212;";var n=parseFloat(String(v).replace(/[^0-9.]/g,""));if(isNaN(n))return String(v);if(n>=1e9)return"$"+(n/1e9).toFixed(2)+"B";if(n>=1e6)return"$"+(n/1e6).toFixed(2)+"M";if(n>=1e3)return"$"+(n/1e3).toFixed(0)+"K";return"$"+n.toFixed(0)}
+function setLoading(){var t=T[lang];["congressData","hedgeData","samData","canadaData","analysisData"].forEach(function(id){document.getElementById(id).innerHTML="<div class='loading'>"+t.loading+"</div>"})}
+function fetchAPI(url){return fetch(url).then(function(r){return r.json()})}
+function renderCongress(trades,q){var el=document.getElementById("congressData");var t=T[lang];if(!trades.length){el.innerHTML="<div class='empty-state'>"+t.emptyCongress+"</div>";return}el.innerHTML=trades.slice(0,15).map(function(x){return"<div class='trade-item'><div class='trade-ticker'>"+esc(x.ticker||"&#8212;")+"</div><div class='trade-meta'><div class='trade-name'>"+esc(x.asset_description||x.ticker||"")+"</div><div class='trade-detail'>"+esc(x.representative||x.senator||"Unknown")+" &middot; "+esc(x.transaction_date||"")+"</div></div><div class='trade-amount "+((x.type||"").toLowerCase().indexOf("sale")>=0?"amount-sell":"amount-buy")+"'>"+esc(x.type||"Trade")+"<br><span style='font-size:.6rem;color:var(--muted)'>"+esc(x.amount||"")+"</span></div></div>"}).join("")}
+function renderHedge(holdings,q){var el=document.getElementById("hedgeData");var t=T[lang];if(!holdings.length){el.innerHTML="<div class='empty-state'>"+t.emptyHedge+"</div>";return}el.innerHTML=holdings.slice(0,10).map(function(h){return"<div class='fund-item'><div class='fund-name'>"+esc(h.fund_name||h.name||"")+"</div><div class='trade-detail'>"+esc(h.filing_date||"")+" &middot; "+esc((h.shares||0).toLocaleString())+" shares &middot; $"+esc((h.value||0).toLocaleString())+"K</div>"+(h.top_holdings?"<div class='fund-holdings'>"+h.top_holdings.map(function(s){return"<span class='holding-tag'>"+esc(s)+"</span>"}).join("")+"</div>":"")+"</div>"}).join("")}
+function renderSAM(contracts,q){var el=document.getElementById("samData");var t=T[lang];if(!contracts.length){el.innerHTML="<div class='empty-state'>"+t.emptySam+"</div>";return}el.innerHTML=contracts.slice(0,10).map(function(c){return"<div class='contract-item'><div class='contract-name'>"+esc(c.vendorName||c.awardee||"Unknown")+"</div><div class='contract-detail'>"+esc(c.agencyName||"")+" &middot; "+esc(c.award_date||c.date||"")+"<br>"+esc(c.description||c.title||"")+"</div><div class='contract-amount'>"+fmtAmt(c.award_amount||c.amount)+"</div></div>"}).join("")}
+function renderCanada(contracts,q){var el=document.getElementById("canadaData");var t=T[lang];if(!contracts.length){el.innerHTML="<div class='empty-state'>"+t.emptyCanada+"</div>";return}el.innerHTML=contracts.slice(0,10).map(function(c){return"<div class='contract-item'><div class='contract-name'>"+esc(c.vendor_name||c.supplier_name||"Unknown")+"</div><div class='contract-detail'>"+esc(c.department||c.owner_org||"")+" &middot; "+esc(c.contract_date||c.award_date||"")+"<br>"+esc(c.description_en||c.description||"")+"</div><div class='contract-amount'>"+fmtAmt(c.contract_value||c.value)+"</div></div>"}).join("")}
+function generateAnalysis(results){var el=document.getElementById("analysisData");var t=T[lang];el.innerHTML="<div class='loading'>"+t.loadingAnalysis+"</div>";fetch("/api/analyze-panopticon",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(Object.assign({},results,{lang:lang,systemPrompt:t.systemPrompt}))}).then(function(r){return r.json()}).then(function(data){el.innerHTML=data.result?"<div class='analysis-output'>"+marked.parse(data.result)+"</div>":"<div class='empty-state'>"+t.analysisFail+"</div>"}).catch(function(){el.innerHTML="<div class='empty-state'>"+t.analysisError+"</div>"})}
+function runSearch(){var q=document.getElementById("searchInput").value.trim();if(!q)return;setLoading();var t=T[lang];document.getElementById("lastUpdate").textContent=t.updated+new Date().toLocaleTimeString();Promise.allSettled([fetchAPI("/api/congress?q="+encodeURIComponent(q)).then(function(d){return d.trades||[]}),fetchAPI("/api/hedge?q="+encodeURIComponent(q)).then(function(d){return d.holdings||[]}),fetchAPI("/api/sam?q="+encodeURIComponent(q)).then(function(d){return d.contracts||[]}),fetchAPI("/api/canada?q="+encodeURIComponent(q)).then(function(d){return d.contracts||[]})]).then(function(results){var data={query:q,congress:results[0].status==="fulfilled"?results[0].value:[],hedge:results[1].status==="fulfilled"?results[1].value:[],sam:results[2].status==="fulfilled"?results[2].value:[],canada:results[3].status==="fulfilled"?results[3].value[]};renderCongress(data.congress,q);renderHedge(data.hedge,q);renderSAM(data.sam,q);renderCanada(data.canada,q);generateAnalysis(data)})}
+function loadRecent(){setLoading();var t=T[lang];document.getElementById("lastUpdate").textContent=t.updated+new Date().toLocaleTimeString();fetchAPI("/api/congress?q=").then(function(d){return d.trades||[]}).catch(function(){return[]}).then(function(data){renderCongress(data,"");["hedgeData","samData","canadaData"].forEach(function(id){document.getElementById(id).innerHTML="<div class='empty-state'>"+t.recentOther+"</div>"});document.getElementById("analysisData").innerHTML="<div class='empty-state'>"+t.recentAnalysis+"</div>"})}
+document.getElementById("searchInput").addEventListener("keydown",function(e){if(e.key==="Enter")runSearch()});
+</script>
 </body>
 </html>
