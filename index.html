@@ -85,8 +85,8 @@ footer{border-top:1px solid var(--border);padding-top:20px;margin-top:40px;font-
   </div>
   <div class="header-right">
     <div class="lang-toggle">
-      <button class="lang-btn" id="btnEN" onclick="setLang('en')">EN</button>
-      <button class="lang-btn active" id="btnZH" onclick="setLang('zh')">繁中</button>
+      <button class="lang-btn active" id="btnEN" onclick="setLang('en')">EN</button>
+      <button class="lang-btn" id="btnZH" onclick="setLang('zh')">繁中</button>
     </div>
     <div class="header-meta">
       <span class="live-dot"></span><span id="liveLabel"></span><br>
@@ -213,7 +213,7 @@ var T = {
   }
 };
 
-var lang = "zh";
+var lang = "en";
 
 function setLang(l) {
   lang = l;
@@ -247,7 +247,7 @@ function setLang(l) {
   document.getElementById("analysisData").innerHTML = "<div class='empty-state'>" + t.emptyAnalysis + "</div>";
 }
 
-setLang("zh");
+setLang("en");
 
 function switchTab(el, tab) {
   document.querySelectorAll(".tab").forEach(function(t) { t.classList.remove("active"); });
