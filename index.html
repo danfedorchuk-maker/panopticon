@@ -313,10 +313,17 @@ function renderHedge(holdings, q) {
   var t = T[lang];
   if (!holdings.length) { el.innerHTML = "<div class='empty-state'>" + t.emptyHedge + "</div>"; return; }
   el.innerHTML = holdings.slice(0,10).map(function(h) {
+    var shares = h.shares ? h.shares.toLocaleString() : '—';
+    var value  = h.value  ? '$' + (h.value >= 1e9 ? (h.value/1e9).toFixed(2)+'B' : h.value >= 1e6 ? (h.value/1e6).toFixed(1)+'M' : (h.value/1e3).toFixed(0)+'K') : '—';
+    var period = h.period ? ' &middot; Period: ' + esc(h.period) : '';
     return "<div class='fund-item'>" +
-      "<div class='fund-name'>" + esc(h.fund_name || h.name || "") + "</div>" +
-      "<div class='trade-detail'>" + esc(h.filing_date || "") + " &middot; " + esc((h.shares||0).toLocaleString()) + " shares &middot; $" + esc((h.value||0).toLocaleString()) + "K</div>" +
-      (h.top_holdings ? "<div class='fund-holdings'>" + h.top_holdings.map(function(s) { return "<span class='holding-tag'>" + esc(s) + "</span>"; }).join("") + "</div>" : "") +
+      "<div class='fund-name'>" + esc(h.fund_name || "") + "</div>" +
+      "<div class='trade-name' style='font-size:.8rem;margin-bottom:3px'>" + esc(h.name || q) + "</div>" +
+      "<div class='trade-detail'>" + esc(h.filing_date || "") + period + "</div>" +
+      "<div style='display:flex;gap:10px;margin-top:6px;flex-wrap:wrap'>" +
+        "<span class='holding-tag' style='background:#d1fae5;color:#059669;border-color:#6ee7b7'>" + shares + " shares</span>" +
+        "<span class='holding-tag' style='background:#fef3c7;color:#d97706;border-color:#fcd34d'>" + value + " value</span>" +
+      "</div>" +
     "</div>";
   }).join("");
 }
